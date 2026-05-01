@@ -1,0 +1,2180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>都道府県クイズ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  
+  button, .option-btn, .start-btn, .next-btn, .restart-btn, .mode-btn {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+
+  :root {
+    --pink: #ff6b9d;
+    --yellow: #ffd93d;
+    --blue: #6bcaff;
+    --green: #6bdb8f;
+    --orange: #ff9551;
+    --purple: #c490e4;
+    --cream: #fff8e7;
+    --dark: #2a3850;
+    --correct: #4ade80;
+    --wrong: #f87171;
+    --map-bg: #d4ecf5;
+    --map-land: #f5e8c8;
+    --map-stroke: #5b7a99;
+    --map-highlight: #ff3b6e;
+  }
+
+  body {
+    font-family: 'BIZ UDPGothic', 'UD デジタル 教科書体 NK-R', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    background: linear-gradient(135deg, #d4ecf5 0%, #fff8e7 50%, #ffe5e5 100%);
+    min-height: 100vh;
+    color: var(--dark);
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .title-screen {
+    text-align: center;
+    padding: 30px 20px;
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .badge {
+    display: inline-block;
+    background: var(--dark);
+    color: var(--yellow);
+    padding: 6px 20px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif;
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 0 #d44a7a;
+  }
+
+  .title-screen h1 {
+    font-family: 'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif;
+    font-size: clamp(1.8rem, 6vw, 3rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, #4361ee, #7209b7, #f72585);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .title-screen .subtitle {
+    font-size: 1rem;
+    color: var(--dark);
+    margin-bottom: 24px;
+    font-family: 'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif;
+  }
+
+  .map-emoji {
+    font-size: 4.5rem;
+    display: inline-block;
+    animation: bounce 2s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-15px) rotate(3deg); }
+  }
+
+  .start-btn {
+    background: linear-gradient(135deg, #4361ee, #7209b7);
+    color: white;
+    font-family: inherit;
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding: 16px 44px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #2a3a8c, 0 10px 20px rgba(67,97,238,0.4);
+    transition: all 0.15s;
+    margin-top: 16px;
+  }
+
+  .start-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 #2a3a8c, 0 12px 24px rgba(67,97,238,0.5);
+  }
+
+  .start-btn:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #2a3a8c;
+  }
+
+  .start-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .info-box {
+    background: white;
+    border-radius: 24px;
+    padding: 18px 24px;
+    margin: 20px auto;
+    max-width: 480px;
+    box-shadow: 0 4px 0 #c8d4e8, 0 8px 16px rgba(0,0,0,0.05);
+    border: 3px solid #4361ee;
+  }
+
+  .info-box p { margin: 6px 0; font-size: 0.95rem; }
+
+  .level-stars {
+    color: #ffa500;
+    font-size: 1.1rem;
+    letter-spacing: 4px;
+  }
+
+  /* 問題数選択モード */
+  .quiz-mode-select {
+    background: white;
+    border-radius: 24px;
+    padding: 16px 18px;
+    margin: 16px auto;
+    max-width: 480px;
+    box-shadow: 0 4px 0 #c8d4e8;
+    border: 3px solid #7209b7;
+  }
+  .mode-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .mode-btn {
+    background: white;
+    color: var(--dark);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 12px 4px;
+    border: 3px solid var(--dark);
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--dark);
+    transition: all 0.15s;
+    line-height: 1.2;
+  }
+  .mode-btn small {
+    font-size: 0.7rem;
+    color: #888;
+    font-weight: 400;
+  }
+  .mode-btn:hover:not(.active) {
+    background: var(--cream);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--dark);
+  }
+  .mode-btn.active {
+    background: linear-gradient(135deg, #4361ee, #7209b7);
+    color: white;
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--dark);
+  }
+  .mode-btn.active small { color: rgba(255,255,255,0.8); }
+
+  .loading-msg {
+    margin-top: 16px;
+    font-size: 0.9rem;
+    color: #666;
+    font-family: 'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif;
+    min-height: 1.5em;
+  }
+
+  .quiz-screen {
+    display: none;
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  .progress-bar {
+    background: white;
+    border-radius: 50px;
+    height: 22px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 12px;
+    border: 2px solid var(--dark);
+  }
+
+  .progress-fill {
+    background: linear-gradient(90deg, #4361ee, #7209b7, #f72585);
+    height: 100%;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50px;
+  }
+
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-family: 'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif;
+    font-size: 1rem;
+  }
+
+  .question-number {
+    background: var(--yellow);
+    color: var(--dark);
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-weight: 700;
+    border: 2px solid var(--dark);
+    box-shadow: 2px 2px 0 var(--dark);
+  }
+
+  .score-display {
+    background: #4361ee;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-weight: 700;
+    border: 2px solid var(--dark);
+    box-shadow: 2px 2px 0 var(--dark);
+  }
+
+  .question-card {
+    background: white;
+    border-radius: 24px;
+    padding: 18px;
+    box-shadow: 0 6px 0 var(--dark), 0 12px 24px rgba(0,0,0,0.08);
+    border: 3px solid var(--dark);
+    margin-bottom: 16px;
+  }
+
+  .map-container {
+    width: 100%;
+    background: var(--map-bg);
+    border-radius: 16px;
+    border: 3px solid var(--dark);
+    overflow: hidden;
+    margin-bottom: 14px;
+    position: relative;
+    aspect-ratio: 5 / 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ジャンルバッジ */
+  .genre-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #4361ee, #7209b7);
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 50px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 0 var(--dark);
+    border: 2px solid var(--dark);
+  }
+  .genre-badge.capital   { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+  .genre-badge.specialty { background: linear-gradient(135deg, #10b981, #059669); }
+  .genre-badge.nature    { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+  .genre-badge.culture   { background: linear-gradient(135deg, #ec4899, #be185d); }
+
+  /* アイコン表示エリア（地図以外のジャンル用） */
+  .icon-container {
+    width: 100%;
+    background: linear-gradient(135deg, #fff8e7 0%, #fff5d4 100%);
+    border-radius: 16px;
+    border: 3px solid var(--dark);
+    margin-bottom: 14px;
+    aspect-ratio: 5 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .big-icon {
+    font-size: clamp(4rem, 16vw, 7rem);
+    animation: iconBounce 1.2s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+  }
+  @keyframes iconBounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.05); }
+  }
+
+  .map-container > svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Geolonia SVG用：すべての県をデフォルト色に */
+  .map-container .prefecture {
+    fill: var(--map-land);
+    stroke: var(--map-stroke);
+    stroke-width: 0.6;
+    transition: fill 0.4s;
+  }
+
+  /* ハイライト県 */
+  .map-container .prefecture.highlight,
+  .map-container .prefecture.highlight path,
+  .map-container .prefecture.highlight polygon {
+    fill: var(--map-highlight) !important;
+    stroke: #c41e3a !important;
+    stroke-width: 1.2 !important;
+    animation: pulseHL 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulseHL {
+    0%, 100% { fill: var(--map-highlight) !important; }
+    50% { fill: #ff7090 !important; }
+  }
+
+  .map-container .boundary,
+  .map-container .boundary-line {
+    stroke: #888 !important;
+    fill: none !important;
+  }
+
+  .question-text {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.7;
+    margin-bottom: 6px;
+    text-align: center;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    line-break: strict;
+  }
+
+  .hint {
+    font-size: 0.9rem;
+    color: #5b7a99;
+    text-align: center;
+    margin-bottom: 4px;
+    font-family: 'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    line-break: strict;
+  }
+
+  .feedback-detail {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    line-break: strict;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .option-btn {
+    background: white;
+    color: var(--dark);
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 14px 8px;
+    border: 3px solid var(--dark);
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--dark);
+    transition: all 0.15s;
+    line-height: 1.3;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--dark);
+    background: var(--cream);
+  }
+
+  .option-btn:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 var(--dark);
+  }
+
+  .option-btn:disabled { cursor: default; }
+
+  .option-btn.correct {
+    background: var(--correct);
+    color: white;
+    animation: pulse 0.5s ease-out;
+  }
+
+  .option-btn.wrong {
+    background: var(--wrong);
+    color: white;
+    animation: shake 0.4s ease-out;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .feedback {
+    background: white;
+    border-radius: 22px;
+    padding: 18px;
+    margin-top: 14px;
+    border: 3px solid var(--dark);
+    box-shadow: 0 4px 0 var(--dark);
+    display: none;
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .feedback.show { display: block; }
+
+  .feedback-icon {
+    font-size: 2.6rem;
+    text-align: center;
+    margin-bottom: 6px;
+    animation: bounce 0.6s ease-out;
+  }
+
+  .feedback-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .feedback-title.correct-text { color: var(--correct); }
+  .feedback-title.wrong-text { color: var(--wrong); }
+
+  .feedback-detail {
+    background: var(--cream);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+
+  .next-btn {
+    background: linear-gradient(135deg, #4361ee, #7209b7);
+    color: white;
+    font-family: inherit;
+    font-size: 1.15rem;
+    font-weight: 700;
+    padding: 12px 36px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #2a3a8c;
+    width: 100%;
+    transition: all 0.15s;
+  }
+
+  .next-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #2a3a8c;
+  }
+
+  .result-screen {
+    display: none;
+    text-align: center;
+    padding: 30px 20px;
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .result-screen h2 {
+    font-family: 'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif;
+    font-size: 2.2rem;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #4361ee, #7209b7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .trophy {
+    font-size: 6rem;
+    margin: 20px 0;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  .final-score {
+    background: white;
+    border-radius: 24px;
+    padding: 28px 20px;
+    margin: 20px auto;
+    max-width: 400px;
+    box-shadow: 0 6px 0 var(--dark);
+    border: 3px solid var(--dark);
+  }
+
+  .final-score .big-num {
+    font-size: 4rem;
+    font-weight: 700;
+    color: #4361ee;
+    line-height: 1;
+  }
+
+  .final-score .total {
+    font-size: 1.4rem;
+    color: #888;
+  }
+
+  .result-message {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 18px 0;
+    line-height: 1.6;
+  }
+
+  .restart-btn {
+    background: linear-gradient(135deg, var(--green), #4361ee);
+    color: white;
+    font-family: inherit;
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 14px 36px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #2a8a4a;
+    margin-top: 16px;
+  }
+
+  .restart-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 #2a8a4a;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .confetti {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .sparkle {
+    position: absolute;
+    font-size: 1.5rem;
+    pointer-events: none;
+    animation: sparkleFade 1.2s ease-out forwards;
+  }
+
+  @keyframes sparkleFade {
+    0% { opacity: 1; transform: scale(0) rotate(0); }
+    50% { opacity: 1; transform: scale(1.4) rotate(180deg); }
+    100% { opacity: 0; transform: scale(0.5) rotate(360deg); }
+  }
+
+  .map-loading-state {
+    text-align: center;
+    color: #5b7a99;
+    padding: 40px 20px;
+    font-family: 'Zen Maru Gothic', 'BIZ UDPGothic', sans-serif;
+  }
+
+  .map-loading-state.error { color: #c41e3a; }
+
+  .spinner {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border: 4px solid #c8d4e8;
+    border-top-color: #4361ee;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 8px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .map-arrow {
+    pointer-events: none;
+  }
+
+  .map-arrow path,
+  .map-arrow circle {
+    animation: arrowDrop 0.7s cubic-bezier(0.5, 0, 0.5, 1.5);
+  }
+
+  @keyframes arrowDrop {
+    0% { transform: translateY(-30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  @media (max-width: 480px) {
+    .options { grid-template-columns: 1fr; }
+    .question-text { font-size: 1rem; }
+    .option-btn { font-size: 0.95rem; padding: 12px 6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="titleScreen" class="title-screen">
+    <div class="map-emoji">🗾</div>
+    <h1>都道府県クイズ</h1>
+    <p class="subtitle">〜 5つのジャンルからミックス出題！ 〜</p>
+    <div class="info-box">
+      <p>📍 地図クイズ ＋ 🏛️ 県庁所在地</p>
+      <p>🍱 特産物 ＋ 🏞️ 自然・地形 ＋ 🎎 祭り・文化</p>
+      <p>レベル：<span class="level-stars">★★★★☆</span></p>
+      <p style="font-size:0.85rem;color:#888;">毎回ランダムでいろんな問題が出るよ。</p>
+    </div>
+
+    <div class="quiz-mode-select">
+      <p style="margin-bottom:10px;font-weight:700;">何問にちょうせんする？</p>
+      <div class="mode-btns">
+        <button class="mode-btn" data-count="10">10問<br><small>かんたん</small></button>
+        <button class="mode-btn active" data-count="20">20問<br><small>ふつう</small></button>
+        <button class="mode-btn" data-count="40">40問<br><small>がっつり</small></button>
+      </div>
+    </div>
+
+    <button id="startBtn" class="start-btn" onclick="startQuiz()" disabled>じゅんびちゅう…</button>
+    <p class="loading-msg" id="loadingMsg"><span class="spinner" style="width:16px;height:16px;border-width:3px;vertical-align:middle"></span> 地図データを読み込んでいます…</p>
+  </div>
+
+  <div id="quizScreen" class="quiz-screen">
+    <div class="progress-bar">
+      <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+    </div>
+    <div class="quiz-header">
+      <span class="question-number" id="questionNum">もんだい 1 / 15</span>
+      <span class="score-display">⭐ <span id="scoreNum">0</span></span>
+    </div>
+    <div class="question-card">
+      <div class="genre-badge" id="genreBadge">📍 地図クイズ</div>
+      <div class="map-container" id="mapContainer">
+        <div class="map-loading-state"><span class="spinner"></span><br>地図を読みこみ中…</div>
+      </div>
+      <div class="icon-container" id="iconContainer" style="display:none;">
+        <div class="big-icon" id="bigIcon">🗾</div>
+      </div>
+      <p class="hint" id="questionHint"></p>
+      <p class="question-text" id="questionText"></p>
+      <div class="options" id="optionsContainer"></div>
+    </div>
+    <div class="feedback" id="feedback">
+      <div class="feedback-icon" id="feedbackIcon"></div>
+      <div class="feedback-title" id="feedbackTitle"></div>
+      <div class="feedback-detail" id="feedbackDetail"></div>
+      <button class="next-btn" onclick="nextQuestion()">つぎへ ➡</button>
+    </div>
+  </div>
+
+  <div id="resultScreen" class="result-screen">
+    <div class="trophy" id="trophyIcon">🏆</div>
+    <h2 id="resultTitle">けっか はっぴょう！</h2>
+    <div class="final-score">
+      <div><span class="big-num" id="finalScore">0</span><span class="total"> / 15</span></div>
+      <p style="margin-top:8px;color:#888;">もんだい せいかい</p>
+    </div>
+    <p class="result-message" id="resultMessage"></p>
+    <button class="restart-btn" onclick="restartQuiz()">もういっかい！ 🔄</button>
+  </div>
+</div>
+
+<script>
+// 都道府県コード（JIS X 0401）
+const PREF_CODES = {
+  hokkaido:1, aomori:2, iwate:3, miyagi:4, akita:5, yamagata:6, fukushima:7,
+  ibaraki:8, tochigi:9, gunma:10, saitama:11, chiba:12, tokyo:13, kanagawa:14,
+  niigata:15, toyama:16, ishikawa:17, fukui:18, yamanashi:19, nagano:20,
+  gifu:21, shizuoka:22, aichi:23, mie:24, shiga:25, kyoto:26, osaka:27, hyogo:28,
+  nara:29, wakayama:30, tottori:31, shimane:32, okayama:33, hiroshima:34, yamaguchi:35,
+  tokushima:36, kagawa:37, ehime:38, kochi:39, fukuoka:40, saga:41, nagasaki:42,
+  kumamoto:43, oita:44, miyazaki:45, kagoshima:46, okinawa:47
+};
+
+// 地図SVGのソース候補（フォールバック含む）
+const MAP_SOURCES = [
+  'https://geolonia.github.io/japanese-prefectures/map-full.svg',
+  'https://cdn.jsdelivr.net/gh/geolonia/japanese-prefectures@master/map-full.svg',
+  'https://raw.githubusercontent.com/geolonia/japanese-prefectures/master/map-full.svg'
+];
+
+let mapSvgText = null;
+let mapLoadFailed = false;
+
+async function loadMap() {
+  for (const url of MAP_SOURCES) {
+    try {
+      console.log('地図よみこみ試行:', url);
+      const res = await fetch(url, { mode: 'cors' });
+      if (res.ok) {
+        const text = await res.text();
+        if (text.includes('<svg') && text.includes('prefecture')) {
+          mapSvgText = text;
+          console.log('地図よみこみ成功:', url);
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('地図よみこみ失敗:', url, e.message);
+    }
+  }
+  mapLoadFailed = true;
+  return false;
+}
+
+// 地図を構築：指定した県をハイライト
+function buildMap(prefId) {
+  if (!mapSvgText) {
+    return '<div class="map-loading-state error">⚠️ 地図がよみこめませんでした。<br>インターネットせつぞくをかくにんしてね。</div>';
+  }
+  
+  const code = PREF_CODES[prefId];
+  if (!code) return mapSvgText;
+  
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(mapSvgText, 'image/svg+xml');
+  const svg = doc.querySelector('svg');
+  if (!svg) return mapSvgText;
+  
+  const codeStr = String(code).padStart(2, '0');
+  // data-codeで指定された県を見つける
+  const matches = svg.querySelectorAll(
+    `[data-code="${codeStr}"], [data-code="${code}"]`
+  );
+  
+  matches.forEach(el => {
+    el.classList.add('highlight');
+    // 子要素にも適用（path, polygonなど）
+    el.querySelectorAll('path, polygon, polyline').forEach(child => {
+      child.classList.add('highlight');
+    });
+  });
+  
+  // SVGに正しい属性を設定
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  
+  return new XMLSerializer().serializeToString(svg);
+}
+
+// 地図描画後に矢印（ピン）マーカーを追加
+function addArrowToHighlight() {
+  const container = document.getElementById('mapContainer');
+  const svg = container.querySelector('svg');
+  if (!svg) return;
+  
+  // ハイライトされた要素を検索
+  const highlighted = svg.querySelector('.prefecture.highlight, .highlight');
+  if (!highlighted) return;
+  
+  let bbox;
+  try {
+    bbox = highlighted.getBBox();
+  } catch (e) {
+    return;
+  }
+  
+  if (!bbox || bbox.width === 0) return;
+  
+  const cx = bbox.x + bbox.width / 2;
+  const cy = bbox.y + bbox.height / 2;
+  // 県のサイズに応じてマーカーサイズ調整
+  const minDim = Math.min(bbox.width, bbox.height);
+  const size = Math.max(minDim * 0.4, 12);
+  
+  const ns = 'http://www.w3.org/2000/svg';
+  const arrow = document.createElementNS(ns, 'g');
+  arrow.classList.add('map-arrow');
+  arrow.setAttribute('transform', `translate(${cx},${cy})`);
+  arrow.style.transformOrigin = `${cx}px ${cy}px`;
+  
+  // ピン形状（水滴形）
+  const path = document.createElementNS(ns, 'path');
+  path.setAttribute('d', `M 0 ${size*0.9} L ${-size*0.45} ${size*0.3} A ${size*0.5} ${size*0.5} 0 1 1 ${size*0.45} ${size*0.3} Z`);
+  path.setAttribute('fill', '#c41e3a');
+  path.setAttribute('stroke', '#fff');
+  path.setAttribute('stroke-width', String(size * 0.08));
+  path.setAttribute('transform', `translate(0, ${-size*0.6})`);
+  
+  // 中心の白丸
+  const circle = document.createElementNS(ns, 'circle');
+  circle.setAttribute('cx', '0');
+  circle.setAttribute('cy', String(-size * 0.4));
+  circle.setAttribute('r', String(size * 0.15));
+  circle.setAttribute('fill', '#fff');
+  
+  arrow.appendChild(path);
+  arrow.appendChild(circle);
+  svg.appendChild(arrow);
+}
+
+// 47都道府県の問題データ
+// ルール: hint, question, options内の選択肢以外、explainの最初以外、すべて県名が入らないようにする
+const questions = [
+  // ===== 北海道 =====
+  {
+    type: "map",
+    pref: "hokkaido",
+    hint: "日本の一番北、いちばん面積が広い",
+    question: "じゃがいも・牛乳・バターの生産が日本一で、サッポロや旭川（あさひかわ）がある都道府県は？",
+    options: ["青森県", "北海道", "岩手県", "新潟県"],
+    answer: 1,
+    explain: "<strong>北海道</strong>！日本の面積の22%をしめるいちばん広い都道府県。広い大地で農業（のうぎょう）がさかんだよ🐮"
+  },
+  // ===== 東北地方 =====
+  {
+    type: "map",
+    pref: "aomori",
+    hint: "本州（ほんしゅう）の一番北",
+    question: "りんごの生産が日本一！ねぶたまつりやマグロの大間（おおま）がゆうめいな県は？",
+    options: ["青森県", "岩手県", "秋田県", "北海道"],
+    answer: 0,
+    explain: "<strong>青森県</strong>！りんごの生産は日本の半分以上をしめる。ねぶたまつりは毎年8月にひらかれるよ🍎"
+  },
+  {
+    type: "map",
+    pref: "iwate",
+    hint: "東北地方の太平洋がわ、本州で一番ひろい",
+    question: "わんこそば・南部鉄器（なんぶてっき）でゆうめい。県庁所在地は盛岡市（もりおかし）の県は？",
+    options: ["青森県", "岩手県", "秋田県", "山形県"],
+    answer: 1,
+    explain: "<strong>岩手県</strong>！本州で一番面積が広い県で、わんこそば・南部鉄器・冷麺（れいめん）がゆうめい🥣"
+  },
+  {
+    type: "map",
+    pref: "akita",
+    hint: "東北地方の日本海がわ、北のほう",
+    question: "なまはげ・きりたんぽ・あきた犬がゆうめいな県は？",
+    options: ["青森県", "岩手県", "秋田県", "新潟県"],
+    answer: 2,
+    explain: "<strong>秋田県</strong>！男鹿半島（おがはんとう）の「なまはげ」は重要無形民俗文化財。米どころとしてもゆうめい🌾"
+  },
+  {
+    type: "map",
+    pref: "miyagi",
+    hint: "東北地方の太平洋がわ、まん中あたり",
+    question: "牛タン・笹かまぼこ・松島（まつしま）がゆうめい。県庁所在地は仙台市（せんだいし）の県は？",
+    options: ["岩手県", "宮城県", "福島県", "山形県"],
+    answer: 1,
+    explain: "<strong>宮城県</strong>！仙台は「杜（もり）の都」とよばれる東北一の大都市。松島は日本三景のひとつだよ🐂"
+  },
+  {
+    type: "map",
+    pref: "yamagata",
+    hint: "東北地方の日本海がわ、南のほう",
+    question: "さくらんぼの生産が日本一！「佐藤錦（さとうにしき）」がゆうめいな県は？",
+    options: ["山形県", "福島県", "宮城県", "秋田県"],
+    answer: 0,
+    explain: "<strong>山形県</strong>！日本のさくらんぼの約7わりがここでとれる。米沢牛（よねざわぎゅう）もゆうめい🍒"
+  },
+  {
+    type: "map",
+    pref: "fukushima",
+    hint: "東北地方のいちばん南",
+    question: "ももの生産が多く、会津若松（あいづわかまつ）の白虎隊（びゃっこたい）でゆうめいな県は？",
+    options: ["山形県", "福島県", "茨城県", "栃木県"],
+    answer: 1,
+    explain: "<strong>福島県</strong>！東北で一番南にあって、ももの生産は日本2位。会津若松は江戸時代からの城下町だよ🍑"
+  },
+  // ===== 関東地方 =====
+  {
+    type: "map",
+    pref: "ibaraki",
+    hint: "関東地方の北東、太平洋がめんしている",
+    question: "納豆（なっとう）・メロンの生産が日本一の県は？県庁所在地は水戸市（みとし）。",
+    options: ["群馬県", "栃木県", "茨城県", "千葉県"],
+    answer: 2,
+    explain: "<strong>茨城県</strong>！水戸納豆（みとなっとう）はとってもゆうめい。メロンの生産も日本一だよ🫘"
+  },
+  {
+    type: "map",
+    pref: "tochigi",
+    hint: "関東地方の北、海に面していない",
+    question: "いちご「とちおとめ」・日光東照宮（にっこうとうしょうぐう）でゆうめいな県は？",
+    options: ["群馬県", "栃木県", "茨城県", "埼玉県"],
+    answer: 1,
+    explain: "<strong>栃木県</strong>！日光東照宮は世界遺産。いちごの生産も日本一で、「とちおとめ」「スカイベリー」がゆうめい🍓"
+  },
+  {
+    type: "map",
+    pref: "gunma",
+    hint: "関東地方の北西、海に面していない",
+    question: "こんにゃく・草津温泉（くさつおんせん）・だるまがゆうめいな県は？",
+    options: ["群馬県", "栃木県", "茨城県", "長野県"],
+    answer: 0,
+    explain: "<strong>群馬県</strong>！こんにゃくの生産は日本一。草津温泉は日本三名泉のひとつ。富岡製糸場（とみおかせいしじょう）も世界遺産だよ♨️"
+  },
+  {
+    type: "map",
+    pref: "saitama",
+    hint: "関東地方のまん中、海に面していない",
+    question: "東京の北どなり、川越（かわごえ）の小江戸（こえど）や深谷ねぎ（ふかやねぎ）がゆうめいな県は？",
+    options: ["群馬県", "栃木県", "埼玉県", "千葉県"],
+    answer: 2,
+    explain: "<strong>埼玉県</strong>！東京のベッドタウンで人口がとても多い。県庁所在地はさいたま市だよ🌃"
+  },
+  {
+    type: "map",
+    pref: "chiba",
+    hint: "関東地方の南東、太平洋がめんする半島",
+    question: "らっかせい・しょうゆ・成田空港（なりたくうこう）・ディズニーリゾートがある県は？",
+    options: ["神奈川県", "千葉県", "茨城県", "東京都"],
+    answer: 1,
+    explain: "<strong>千葉県</strong>！らっかせいの生産は日本一。日本の空のげんかん成田空港もここにあるよ✈️"
+  },
+  {
+    type: "map",
+    pref: "tokyo",
+    hint: "日本の首都、人口が日本一多い",
+    question: "スカイツリー・浅草寺（せんそうじ）・国会議事堂・渋谷スクランブル交差点がある都道府県は？",
+    options: ["神奈川県", "埼玉県", "千葉県", "東京都"],
+    answer: 3,
+    explain: "<strong>東京都</strong>！人口は1400万人をこえる。23の特別区とたくさんの市町村、伊豆諸島（いずしょとう）と小笠原諸島（おがさわらしょとう）もふくむよ🗼"
+  },
+  {
+    type: "map",
+    pref: "kanagawa",
+    hint: "関東地方の南、東京都の南どなり",
+    question: "シュウマイ・横浜中華街（よこはまちゅうかがい）・鎌倉大仏（かまくらだいぶつ）がある県は？",
+    options: ["東京都", "神奈川県", "千葉県", "静岡県"],
+    answer: 1,
+    explain: "<strong>神奈川県</strong>！県庁所在地は横浜市（よこはまし）で、人口は東京につぐ第2位の市だよ🍜"
+  },
+  // ===== 中部地方 =====
+  {
+    type: "map",
+    pref: "niigata",
+    hint: "中部地方の日本海がわ、北のほう",
+    question: "おいしいお米「コシヒカリ」がゆうめい。日本一ながい川「信濃川（しなのがわ）」が流れる県は？",
+    options: ["新潟県", "富山県", "石川県", "福井県"],
+    answer: 0,
+    explain: "<strong>新潟県</strong>！魚沼産（うおぬまさん）コシヒカリは日本一おいしいお米としてゆうめい。日本酒もたくさん作られているよ🌾"
+  },
+  {
+    type: "map",
+    pref: "toyama",
+    hint: "中部地方の日本海がわ、まん中",
+    question: "ホタルイカ・ますずし・立山連峰（たてやまれんぽう）がゆうめいな県は？",
+    options: ["新潟県", "富山県", "石川県", "福井県"],
+    answer: 1,
+    explain: "<strong>富山県</strong>！3000m級の立山連峰と富山湾（とやまわん）の自然がうつくしい。チューリップの生産もゆうめい🌷"
+  },
+  {
+    type: "map",
+    pref: "ishikawa",
+    hint: "中部地方の日本海がわ、半島が北につき出ている",
+    question: "兼六園（けんろくえん）・輪島塗（わじまぬり）・金沢市（かなざわし）がある県は？",
+    options: ["新潟県", "富山県", "石川県", "福井県"],
+    answer: 2,
+    explain: "<strong>石川県</strong>！能登半島（のとはんとう）が日本海につき出ているのが特徴。兼六園は日本三名園のひとつ🌸"
+  },
+  {
+    type: "map",
+    pref: "fukui",
+    hint: "中部地方の日本海がわ、近畿地方のとなり",
+    question: "めがねフレームの生産が日本一！恐竜博物館（きょうりゅうはくぶつかん）や東尋坊（とうじんぼう）がゆうめいな県は？",
+    options: ["新潟県", "富山県", "石川県", "福井県"],
+    answer: 3,
+    explain: "<strong>福井県</strong>！鯖江（さばえ）のめがねフレームは日本一の生産量。恐竜（きょうりゅう）の化石（かせき）もたくさん見つかっているよ🦕"
+  },
+  {
+    type: "map",
+    pref: "yamanashi",
+    hint: "中部地方、海に面していない、富士山（ふじさん）がある",
+    question: "ぶどう・ももの生産が日本一！富士山がそびえる、海に面していない県は？",
+    options: ["山梨県", "長野県", "静岡県", "群馬県"],
+    answer: 0,
+    explain: "<strong>山梨県</strong>！ぶどう・ももの生産は日本一。ワインの産地（さんち）としてもゆうめい🍇"
+  },
+  {
+    type: "map",
+    pref: "nagano",
+    hint: "海に面していない内陸県、日本アルプスがある",
+    question: "りんご・レタスがゆうめい。1998年に冬季オリンピック（とうきオリンピック）がひらかれた県は？",
+    options: ["山梨県", "長野県", "岐阜県", "群馬県"],
+    answer: 1,
+    explain: "<strong>長野県</strong>！日本アルプスがある山の県。レタスの生産は日本一。県庁所在地は長野市だよ⛷️"
+  },
+  {
+    type: "map",
+    pref: "gifu",
+    hint: "中部地方のまん中、海に面していない",
+    question: "白川郷（しらかわごう）の合掌造り（がっしょうづくり）でゆうめい。鵜飼い（うかい）もゆうめいな県は？",
+    options: ["長野県", "岐阜県", "愛知県", "三重県"],
+    answer: 1,
+    explain: "<strong>岐阜県</strong>！白川郷は世界遺産（せかいいさん）の合掌造りでゆうめい。長良川（ながらがわ）の鵜飼いもゆうめい🏠"
+  },
+  {
+    type: "map",
+    pref: "shizuoka",
+    hint: "中部地方の太平洋がわ、富士山がそびえる",
+    question: "お茶の生産が日本一！うなぎ・サッカーがさかんな県は？",
+    options: ["神奈川県", "静岡県", "愛知県", "山梨県"],
+    answer: 1,
+    explain: "<strong>静岡県</strong>！お茶の生産は日本一。富士山は山梨県とまたがっているよ🍵"
+  },
+  {
+    type: "map",
+    pref: "aichi",
+    hint: "中部地方の太平洋がわ、トヨタ自動車の本社がある",
+    question: "ひつまぶし・手羽先（てばさき）・みそカツがゆうめい。県庁所在地は名古屋市（なごやし）の県は？",
+    options: ["愛知県", "岐阜県", "三重県", "静岡県"],
+    answer: 0,
+    explain: "<strong>愛知県</strong>！自動車の生産が日本一。「なごやめし」もゆうめい🚗"
+  },
+  // ===== 近畿地方 =====
+  {
+    type: "map",
+    pref: "mie",
+    hint: "近畿地方の東がわ、太平洋がめんする",
+    question: "伊勢神宮（いせじんぐう）・真珠（しんじゅ）・松阪牛（まつさかうし）がゆうめいな県は？",
+    options: ["奈良県", "和歌山県", "三重県", "滋賀県"],
+    answer: 2,
+    explain: "<strong>三重県</strong>！伊勢神宮は日本でとてもたいせつな神社。志摩（しま）の真珠と松阪牛もゆうめい🦪"
+  },
+  {
+    type: "map",
+    pref: "shiga",
+    hint: "近畿地方、海に面していない、日本一大きな湖がある",
+    question: "日本で一番大きな湖（みずうみ）「びわ湖」がある県は？",
+    options: ["京都府", "奈良県", "滋賀県", "三重県"],
+    answer: 2,
+    explain: "<strong>滋賀県</strong>！びわ湖は県の面積の6分の1をしめる。県庁所在地は大津市（おおつし）だよ💧"
+  },
+  {
+    type: "map",
+    pref: "kyoto",
+    hint: "近畿地方、北は日本海、千年以上前は日本の首都だった",
+    question: "金閣寺（きんかくじ）・清水寺（きよみずでら）・舞妓さん（まいこさん）がゆうめいな府は？",
+    options: ["京都府", "大阪府", "奈良県", "兵庫県"],
+    answer: 0,
+    explain: "<strong>京都府</strong>！平安時代から1000年以上日本の首都だったところ。お寺や神社がたくさんあるよ⛩️"
+  },
+  {
+    type: "map",
+    pref: "osaka",
+    hint: "近畿地方、瀬戸内海（せとないかい）にめんする",
+    question: "たこ焼き・お好み焼き・道頓堀（どうとんぼり）・USJがあるところは？",
+    options: ["京都府", "奈良県", "大阪府", "兵庫県"],
+    answer: 2,
+    explain: "<strong>大阪府</strong>！「くいだおれ」のまち。県庁所在地は大阪市で、東京につぐ大都市だよ🐙"
+  },
+  {
+    type: "map",
+    pref: "hyogo",
+    hint: "近畿地方、北は日本海、南は瀬戸内海にめんする",
+    question: "姫路城（ひめじじょう）・神戸牛（こうべぎゅう）・明石焼き（あかしやき）がゆうめいな県は？",
+    options: ["京都府", "大阪府", "兵庫県", "岡山県"],
+    answer: 2,
+    explain: "<strong>兵庫県</strong>！姫路城は白くてうつくしい世界遺産。県庁所在地は神戸市（こうべし）。海も山もあるよ🏯"
+  },
+  {
+    type: "map",
+    pref: "nara",
+    hint: "近畿地方、海に面していない、1300年前の都があった",
+    question: "大仏（だいぶつ）・しか・東大寺（とうだいじ）・法隆寺（ほうりゅうじ）がゆうめいな県は？",
+    options: ["三重県", "和歌山県", "奈良県", "京都府"],
+    answer: 2,
+    explain: "<strong>奈良県</strong>！1300年前は日本の首都だった。東大寺の大仏は世界一大きな金銅仏（こんどうぶつ）だよ🦌"
+  },
+  {
+    type: "map",
+    pref: "wakayama",
+    hint: "近畿地方の南、太平洋にめんする半島",
+    question: "みかん・うめの生産が日本一！高野山（こうやさん）や熊野古道（くまのこどう）がある県は？",
+    options: ["三重県", "和歌山県", "奈良県", "兵庫県"],
+    answer: 1,
+    explain: "<strong>和歌山県</strong>！みかん・うめの生産は日本一。高野山と熊野古道は世界遺産だよ🍊"
+  },
+  // ===== 中国地方 =====
+  {
+    type: "map",
+    pref: "tottori",
+    hint: "中国地方の日本海がわ、人口が日本一少ない",
+    question: "日本一大きな砂丘（さきゅう）・なしがゆうめい。日本で人口がいちばん少ない県は？",
+    options: ["島根県", "鳥取県", "岡山県", "福井県"],
+    answer: 1,
+    explain: "<strong>鳥取県</strong>！日本で一番人口が少ない県（約54万人）。砂丘は日本一大きいよ🐪"
+  },
+  {
+    type: "map",
+    pref: "shimane",
+    hint: "中国地方の日本海がわ",
+    question: "出雲大社（いずもたいしゃ）・しじみ・石見銀山（いわみぎんざん）がある県は？",
+    options: ["島根県", "鳥取県", "山口県", "広島県"],
+    answer: 0,
+    explain: "<strong>島根県</strong>！出雲大社は縁結（えんむす）びの神様でゆうめい。石見銀山も世界遺産だよ⛩️"
+  },
+  {
+    type: "map",
+    pref: "okayama",
+    hint: "中国地方の瀬戸内海がわ",
+    question: "ももたろうの伝説（でんせつ）・きびだんご・後楽園（こうらくえん）がゆうめいな県は？",
+    options: ["広島県", "岡山県", "鳥取県", "兵庫県"],
+    answer: 1,
+    explain: "<strong>岡山県</strong>！後楽園は日本三名園のひとつ。マスカット・白桃（はくとう）の生産もさかん🍑"
+  },
+  {
+    type: "map",
+    pref: "hiroshima",
+    hint: "中国地方の瀬戸内海がわ",
+    question: "もみじ饅頭（もみじまんじゅう）・お好み焼き・厳島神社（いつくしまじんじゃ）・原爆ドームがある県は？",
+    options: ["岡山県", "山口県", "島根県", "広島県"],
+    answer: 3,
+    explain: "<strong>広島県</strong>！厳島神社と原爆ドームの2つが世界遺産。カキの生産も日本一だよ⛩️"
+  },
+  {
+    type: "map",
+    pref: "yamaguchi",
+    hint: "本州（ほんしゅう）の一番にし",
+    question: "ふぐ料理・下関（しものせき）の海峡（かいきょう）がゆうめいな県は？",
+    options: ["島根県", "鳥取県", "岡山県", "山口県"],
+    answer: 3,
+    explain: "<strong>山口県</strong>！下関はふぐの水あげ量が日本一。本州と九州をむすぶ関門海峡（かんもんかいきょう）もゆうめい🐡"
+  },
+  // ===== 四国地方 =====
+  {
+    type: "map",
+    pref: "tokushima",
+    hint: "四国（しこく）の北東、太平洋にめんする",
+    question: "阿波（あわ）おどり・なるとの渦潮（うずしお）・すだちがゆうめいな県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 0,
+    explain: "<strong>徳島県</strong>！阿波おどりは400年以上の歴史がある夏まつり。なるとの渦潮は世界三大潮流のひとつ💃"
+  },
+  {
+    type: "map",
+    pref: "kagawa",
+    hint: "四国の北東、瀬戸内海にめんする",
+    question: "うどん・小豆島（しょうどしま）のオリーブがゆうめい。日本で一番面積が小さい県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 1,
+    explain: "<strong>香川県</strong>！讃岐（さぬき）うどんで「うどん県」とよばれる。瀬戸内海の小豆島もゆうめい🍜"
+  },
+  {
+    type: "map",
+    pref: "ehime",
+    hint: "四国の北西、瀬戸内海にめんする",
+    question: "みかん・道後温泉（どうごおんせん）・タオルの生産がさかんな県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 2,
+    explain: "<strong>愛媛県</strong>！みかんとポンジュースでゆうめい。道後温泉は日本最古（さいこ）の温泉のひとつ🍊"
+  },
+  {
+    type: "map",
+    pref: "kochi",
+    hint: "四国の南、太平洋がわ",
+    question: "かつおのたたき・坂本龍馬（さかもとりょうま）の生まれた県は？",
+    options: ["徳島県", "高知県", "愛媛県", "宮崎県"],
+    answer: 1,
+    explain: "<strong>高知県</strong>！太平洋にめんしていて、四万十川（しまんとがわ）は日本最後の清流（せいりゅう）といわれているよ🐟"
+  },
+  // ===== 九州・沖縄地方 =====
+  {
+    type: "map",
+    pref: "fukuoka",
+    hint: "九州地方の北、本州にいちばん近い",
+    question: "とんこつラーメン・明太子（めんたいこ）・もつなべがゆうめい。九州一の大都市がある県は？",
+    options: ["福岡県", "佐賀県", "長崎県", "熊本県"],
+    answer: 0,
+    explain: "<strong>福岡県</strong>！県庁所在地は福岡市で九州一の大都市。博多どんたく・山笠（やまかさ）もゆうめい🍜"
+  },
+  {
+    type: "map",
+    pref: "saga",
+    hint: "九州地方の北西、面積が九州で一番小さい",
+    question: "有田焼（ありたやき）・伊万里焼（いまりやき）・吉野ヶ里遺跡（よしのがりいせき）がゆうめいな県は？",
+    options: ["福岡県", "佐賀県", "長崎県", "大分県"],
+    answer: 1,
+    explain: "<strong>佐賀県</strong>！有田焼や伊万里焼などの焼き物（やきもの）でゆうめい。吉野ヶ里遺跡は弥生時代（やよいじだい）の遺跡（いせき）だよ🏺"
+  },
+  {
+    type: "map",
+    pref: "nagasaki",
+    hint: "九州地方の西、たくさんの島がある",
+    question: "ちゃんぽん・カステラ・ハウステンボス・原爆資料館（げんばくしりょうかん）がある県は？",
+    options: ["福岡県", "佐賀県", "長崎県", "熊本県"],
+    answer: 2,
+    explain: "<strong>長崎県</strong>！江戸時代に外国とのまどぐちだった出島（でじま）がある。島の数は日本一だよ🚢"
+  },
+  {
+    type: "map",
+    pref: "kumamoto",
+    hint: "九州地方のまん中",
+    question: "阿蘇山（あそさん）・くまモン・からし蓮根（れんこん）がゆうめいな県は？",
+    options: ["福岡県", "熊本県", "宮崎県", "大分県"],
+    answer: 1,
+    explain: "<strong>熊本県</strong>！阿蘇山は世界最大級のカルデラがある火山。ゆるキャラの「くまモン」もとってもゆうめい🐻"
+  },
+  {
+    type: "map",
+    pref: "oita",
+    hint: "九州地方の北東、温泉がわく町でゆうめい",
+    question: "別府温泉（べっぷおんせん）・湯布院（ゆふいん）・とり天（てん）がゆうめいな県は？",
+    options: ["福岡県", "宮崎県", "大分県", "熊本県"],
+    answer: 2,
+    explain: "<strong>大分県</strong>！「おんせん県」とよばれるくらい温泉が多い。源泉数（げんせんすう）と湧出量（ゆうしゅつりょう）は日本一♨️"
+  },
+  {
+    type: "map",
+    pref: "miyazaki",
+    hint: "九州地方の南東、太平洋がめんする",
+    question: "マンゴー・チキン南蛮（なんばん）・地鶏（じどり）がゆうめいな県は？",
+    options: ["熊本県", "宮崎県", "鹿児島県", "大分県"],
+    answer: 1,
+    explain: "<strong>宮崎県</strong>！「太陽のたまご」というブランドのマンゴーがゆうめい。1年中あたたかい気候（きこう）🥭"
+  },
+  {
+    type: "map",
+    pref: "kagoshima",
+    hint: "九州地方の南、活火山（かっかざん）がそびえる",
+    question: "桜島（さくらじま）・さつまいも・黒豚（くろぶた）・しろくま（かき氷）がゆうめいな県は？",
+    options: ["長崎県", "熊本県", "宮崎県", "鹿児島県"],
+    answer: 3,
+    explain: "<strong>鹿児島県</strong>！桜島は今もけむりをふきだす活火山。屋久島（やくしま）・奄美大島（あまみおおしま）も世界自然遺産だよ🌋"
+  },
+  {
+    type: "map",
+    pref: "okinawa",
+    hint: "日本の一番南、たくさんの島でできている",
+    question: "サトウキビ・ゴーヤ・ちゅらうみ水族館・シーサーがゆうめいな県は？",
+    options: ["鹿児島県", "宮崎県", "沖縄県", "高知県"],
+    answer: 2,
+    explain: "<strong>沖縄県</strong>！1年中あたたかく、きれいな海でゆうめい。むかしは琉球王国（りゅうきゅうおうこく）という国だったよ🌺"
+  }
+,
+
+  // ===================================================================
+  // 県庁所在地クイズ（県名と県庁所在地が違う県を中心に）
+  // ===================================================================
+  {
+    type: "capital",
+    pref: "miyagi",
+    question: "県庁所在地が「仙台市（せんだいし）」の県は？",
+    options: ["宮城県", "山形県", "福島県", "岩手県"],
+    answer: 0,
+    explain: "<strong>宮城県</strong>！仙台市は東北一の大都市で、伊達政宗（だてまさむね）が築いた城下町だよ🏯"
+  },
+  {
+    type: "capital",
+    pref: "ibaraki",
+    question: "県庁所在地が「水戸市（みとし）」の県は？",
+    options: ["群馬県", "栃木県", "茨城県", "千葉県"],
+    answer: 2,
+    explain: "<strong>茨城県</strong>！水戸納豆や水戸黄門でゆうめい。徳川御三家のひとつ水戸藩（みとはん）があった町。"
+  },
+  {
+    type: "capital",
+    pref: "tochigi",
+    question: "県庁所在地が「宇都宮市（うつのみやし）」の県は？",
+    options: ["栃木県", "群馬県", "茨城県", "福島県"],
+    answer: 0,
+    explain: "<strong>栃木県</strong>！宇都宮はぎょうざのまちとしてゆうめい。"
+  },
+  {
+    type: "capital",
+    pref: "gunma",
+    question: "県庁所在地が「前橋市（まえばしし）」の県は？",
+    options: ["栃木県", "群馬県", "茨城県", "埼玉県"],
+    answer: 1,
+    explain: "<strong>群馬県</strong>！前橋は古くから絹織物（きぬおりもの）で栄えた町だよ。"
+  },
+  {
+    type: "capital",
+    pref: "kanagawa",
+    question: "県庁所在地が「横浜市（よこはまし）」の県は？",
+    options: ["東京都", "神奈川県", "千葉県", "静岡県"],
+    answer: 1,
+    explain: "<strong>神奈川県</strong>！横浜市は東京につぐ人口第2位の市。中華街やみなとみらいでゆうめい🌉"
+  },
+  {
+    type: "capital",
+    pref: "ishikawa",
+    question: "県庁所在地が「金沢市（かなざわし）」の県は？",
+    options: ["新潟県", "富山県", "石川県", "福井県"],
+    answer: 2,
+    explain: "<strong>石川県</strong>！金沢は加賀百万石（かがひゃくまんごく）の城下町。兼六園や金箔（きんぱく）でゆうめい。"
+  },
+  {
+    type: "capital",
+    pref: "aichi",
+    question: "県庁所在地が「名古屋市（なごやし）」の県は？",
+    options: ["愛知県", "岐阜県", "三重県", "静岡県"],
+    answer: 0,
+    explain: "<strong>愛知県</strong>！名古屋市は中部地方一の大都市で、人口は東京・横浜・大阪についで日本第4位。"
+  },
+  {
+    type: "capital",
+    pref: "mie",
+    question: "県庁所在地が「津市（つし）」の県は？",
+    options: ["三重県", "和歌山県", "奈良県", "滋賀県"],
+    answer: 0,
+    explain: "<strong>三重県</strong>！「津」は日本でいちばん短い市の名前だよ⛵"
+  },
+  {
+    type: "capital",
+    pref: "shiga",
+    question: "県庁所在地が「大津市（おおつし）」の県は？",
+    options: ["京都府", "奈良県", "滋賀県", "三重県"],
+    answer: 2,
+    explain: "<strong>滋賀県</strong>！大津市は琵琶湖（びわこ）の南がわにある町だよ。"
+  },
+  {
+    type: "capital",
+    pref: "hyogo",
+    question: "県庁所在地が「神戸市（こうべし）」の県は？",
+    options: ["京都府", "大阪府", "兵庫県", "岡山県"],
+    answer: 2,
+    explain: "<strong>兵庫県</strong>！神戸はおしゃれな港町。神戸牛・スイーツでゆうめい。"
+  },
+  {
+    type: "capital",
+    pref: "shimane",
+    question: "県庁所在地が「松江市（まつえし）」の県は？",
+    options: ["島根県", "鳥取県", "岡山県", "広島県"],
+    answer: 0,
+    explain: "<strong>島根県</strong>！松江は宍道湖（しんじこ）のほとりにある城下町だよ🏯"
+  },
+  {
+    type: "capital",
+    pref: "kagawa",
+    question: "県庁所在地が「高松市（たかまつし）」の県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 1,
+    explain: "<strong>香川県</strong>！高松市は瀬戸内海にめんしていて、栗林公園（りつりんこうえん）でゆうめい。"
+  },
+  {
+    type: "capital",
+    pref: "ehime",
+    question: "県庁所在地が「松山市（まつやまし）」の県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 2,
+    explain: "<strong>愛媛県</strong>！松山市は道後温泉（どうごおんせん）や松山城でゆうめい♨️"
+  },
+  {
+    type: "capital",
+    pref: "okinawa",
+    question: "県庁所在地が「那覇市（なはし）」の県は？",
+    options: ["鹿児島県", "宮崎県", "沖縄県", "高知県"],
+    answer: 2,
+    explain: "<strong>沖縄県</strong>！那覇市は沖縄本島の南がわにある最大の都市。首里城（しゅりじょう）もあるよ。"
+  },
+  {
+    type: "capital",
+    pref: "iwate",
+    question: "県庁所在地が「盛岡市（もりおかし）」の県は？",
+    options: ["青森県", "岩手県", "秋田県", "山形県"],
+    answer: 1,
+    explain: "<strong>岩手県</strong>！盛岡は冷麺・じゃじゃ麺・わんこそばがゆうめいな町だよ🥢"
+  },
+  {
+    type: "capital",
+    pref: "saitama",
+    question: "県庁所在地が「さいたま市」の県は？",
+    options: ["群馬県", "栃木県", "埼玉県", "千葉県"],
+    answer: 2,
+    explain: "<strong>埼玉県</strong>！さいたま市は2001年に浦和（うらわ）・大宮（おおみや）・与野（よの）が合体してできた町。"
+  },
+  {
+    type: "capital",
+    pref: "yamanashi",
+    question: "県庁所在地が「甲府市（こうふし）」の県は？",
+    options: ["山梨県", "長野県", "静岡県", "群馬県"],
+    answer: 0,
+    explain: "<strong>山梨県</strong>！甲府市は武田信玄（たけだしんげん）の城下町。ぶどうとワインでゆうめい🍇"
+  },
+  {
+    type: "capital",
+    pref: "hokkaido",
+    question: "道庁所在地が「札幌市（さっぽろし）」の都道府県は？",
+    options: ["青森県", "北海道", "岩手県", "新潟県"],
+    answer: 1,
+    explain: "<strong>北海道</strong>！札幌市は人口約200万人の北海道一の大都市。冬の雪まつりがゆうめい❄️"
+  },
+  
+  // ===================================================================
+  // 特産物・名物クイズ
+  // ===================================================================
+  {
+    type: "specialty",
+    icon: "🍎",
+    pref: "aomori",
+    question: "りんごの生産が日本一の県は？",
+    options: ["青森県", "長野県", "岩手県", "山形県"],
+    answer: 0,
+    explain: "<strong>青森県</strong>！日本のりんごの約60%がここでとれるよ。「ふじ」「つがる」がゆうめい🍎"
+  },
+  {
+    type: "specialty",
+    icon: "🍒",
+    pref: "yamagata",
+    question: "さくらんぼの生産が日本一の県は？",
+    options: ["山形県", "福島県", "山梨県", "青森県"],
+    answer: 0,
+    explain: "<strong>山形県</strong>！「佐藤錦（さとうにしき）」が代表的なブランド。日本のさくらんぼの約7わりがここ🍒"
+  },
+  {
+    type: "specialty",
+    icon: "🍓",
+    pref: "tochigi",
+    question: "いちごの生産が日本一の県は？",
+    options: ["福岡県", "栃木県", "静岡県", "長崎県"],
+    answer: 1,
+    explain: "<strong>栃木県</strong>！「とちおとめ」「スカイベリー」がブランドいちご🍓"
+  },
+  {
+    type: "specialty",
+    icon: "🍵",
+    pref: "shizuoka",
+    question: "お茶（緑茶）の生産が日本一の県は？",
+    options: ["京都府", "鹿児島県", "静岡県", "三重県"],
+    answer: 2,
+    explain: "<strong>静岡県</strong>！日本のお茶の約4わりがここで作られるよ🍵"
+  },
+  {
+    type: "specialty",
+    icon: "🥩",
+    pref: "hyogo",
+    question: "「神戸牛（こうべぎゅう）」の産地（さんち）は？",
+    options: ["大阪府", "京都府", "兵庫県", "岡山県"],
+    answer: 2,
+    explain: "<strong>兵庫県</strong>！神戸ビーフは世界で一番ゆうめいな日本の牛肉だよ🥩"
+  },
+  {
+    type: "specialty",
+    icon: "🐂",
+    pref: "mie",
+    question: "「松阪牛（まつさかうし）」の産地は？",
+    options: ["三重県", "和歌山県", "奈良県", "滋賀県"],
+    answer: 0,
+    explain: "<strong>三重県</strong>！松阪牛は日本三大和牛のひとつ🐂"
+  },
+  {
+    type: "specialty",
+    icon: "🍜",
+    pref: "kagawa",
+    question: "「讃岐（さぬき）うどん」がゆうめいな県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 1,
+    explain: "<strong>香川県</strong>！県全体で「うどん県」を名のっているくらいゆうめい🍜"
+  },
+  {
+    type: "specialty",
+    icon: "🐮",
+    pref: "hokkaido",
+    question: "じゃがいも・牛乳・バターの生産が日本一の都道府県は？",
+    options: ["青森県", "北海道", "岩手県", "新潟県"],
+    answer: 1,
+    explain: "<strong>北海道</strong>！広い大地で農業（のうぎょう）と酪農（らくのう）がさかん🐮"
+  },
+  {
+    type: "specialty",
+    icon: "🐡",
+    pref: "yamaguchi",
+    question: "ふぐ料理がゆうめいで、下関（しものせき）でたくさん水あげされる県は？",
+    options: ["島根県", "鳥取県", "岡山県", "山口県"],
+    answer: 3,
+    explain: "<strong>山口県</strong>！下関のふぐは「ふく」とよばれて福をよぶといわれているよ🐡"
+  },
+  {
+    type: "specialty",
+    icon: "🦪",
+    pref: "hiroshima",
+    question: "カキ（牡蠣）の生産が日本一の県は？",
+    options: ["岡山県", "山口県", "島根県", "広島県"],
+    answer: 3,
+    explain: "<strong>広島県</strong>！日本のカキの約6わりがここでとれる🦪"
+  },
+  {
+    type: "specialty",
+    icon: "🍊",
+    pref: "wakayama",
+    question: "みかん・うめの生産が日本一の県は？",
+    options: ["三重県", "和歌山県", "愛媛県", "静岡県"],
+    answer: 1,
+    explain: "<strong>和歌山県</strong>！うめの「南高梅（なんこうばい）」もとってもゆうめい🍊"
+  },
+  {
+    type: "specialty",
+    icon: "🍇",
+    pref: "yamanashi",
+    question: "ぶどう・ももの生産が日本一の県は？",
+    options: ["山梨県", "長野県", "山形県", "福島県"],
+    answer: 0,
+    explain: "<strong>山梨県</strong>！ワインの産地としてもゆうめい🍷"
+  },
+  {
+    type: "specialty",
+    icon: "🥬",
+    pref: "nagano",
+    question: "レタスの生産が日本一の県は？",
+    options: ["山梨県", "長野県", "群馬県", "茨城県"],
+    answer: 1,
+    explain: "<strong>長野県</strong>！すずしい高原でレタスを育てているよ🥬"
+  },
+  {
+    type: "specialty",
+    icon: "🫘",
+    pref: "ibaraki",
+    question: "納豆（なっとう）・メロンの生産が日本一の県は？",
+    options: ["群馬県", "栃木県", "茨城県", "千葉県"],
+    answer: 2,
+    explain: "<strong>茨城県</strong>！水戸納豆はとってもゆうめい🫘"
+  },
+  {
+    type: "specialty",
+    icon: "🌾",
+    pref: "niigata",
+    question: "コシヒカリ・お米の生産がさかんな県は？",
+    options: ["新潟県", "秋田県", "山形県", "福島県"],
+    answer: 0,
+    explain: "<strong>新潟県</strong>！魚沼産（うおぬまさん）コシヒカリは日本一おいしいお米といわれる🌾"
+  },
+  {
+    type: "specialty",
+    icon: "🥭",
+    pref: "miyazaki",
+    question: "「太陽のたまご」というブランドのマンゴーがゆうめいな県は？",
+    options: ["熊本県", "宮崎県", "鹿児島県", "沖縄県"],
+    answer: 1,
+    explain: "<strong>宮崎県</strong>！1年中あたたかい気候でフルーツがおいしく育つ🥭"
+  },
+  {
+    type: "specialty",
+    icon: "🍠",
+    pref: "kagoshima",
+    question: "さつまいも・黒豚（くろぶた）の生産がさかんな県は？",
+    options: ["長崎県", "熊本県", "宮崎県", "鹿児島県"],
+    answer: 3,
+    explain: "<strong>鹿児島県</strong>！火山灰（かざんばい）でできた土はさつまいもがよく育つ🍠"
+  },
+  {
+    type: "specialty",
+    icon: "🥜",
+    pref: "chiba",
+    question: "らっかせい（ピーナッツ）の生産が日本一の県は？",
+    options: ["神奈川県", "千葉県", "茨城県", "東京都"],
+    answer: 1,
+    explain: "<strong>千葉県</strong>！日本のらっかせいの約8わりがここでとれる🥜"
+  },
+  {
+    type: "specialty",
+    icon: "🐟",
+    pref: "kochi",
+    question: "かつおのたたきがゆうめいな県は？",
+    options: ["徳島県", "高知県", "愛媛県", "宮崎県"],
+    answer: 1,
+    explain: "<strong>高知県</strong>！太平洋でとれたかつおをワラの火であぶる料理🐟"
+  },
+  
+  // ===================================================================
+  // 自然・地形クイズ
+  // ===================================================================
+  {
+    type: "nature",
+    icon: "🗻",
+    pref: "shizuoka",
+    question: "日本一高い山「富士山（ふじさん）」がある県は？（県のとなりは山梨県）",
+    options: ["山梨県", "静岡県", "神奈川県", "長野県"],
+    answer: 1,
+    explain: "<strong>静岡県</strong>！富士山は山梨県と静岡県にまたがっているよ🗻"
+  },
+  {
+    type: "nature",
+    icon: "💧",
+    pref: "shiga",
+    question: "日本でいちばん大きい湖「びわ湖」がある県は？",
+    options: ["京都府", "奈良県", "滋賀県", "三重県"],
+    answer: 2,
+    explain: "<strong>滋賀県</strong>！びわ湖は県の面積の6分の1をしめるくらい大きい💧"
+  },
+  {
+    type: "nature",
+    icon: "🌊",
+    pref: "niigata",
+    question: "日本でいちばん長い川「信濃川（しなのがわ）」が河口（かこう）でながれこむ県は？",
+    options: ["新潟県", "長野県", "富山県", "山形県"],
+    answer: 0,
+    explain: "<strong>新潟県</strong>！信濃川は長野県で「千曲川（ちくまがわ）」、新潟県で「信濃川」とよばれる🌊"
+  },
+  {
+    type: "nature",
+    icon: "🐪",
+    pref: "tottori",
+    question: "日本でいちばん大きい砂丘（さきゅう）がある県は？",
+    options: ["島根県", "鳥取県", "岡山県", "山口県"],
+    answer: 1,
+    explain: "<strong>鳥取県</strong>！砂丘では砂のうえでらくだに乗ったりパラグライダーをしたりできるよ🐪"
+  },
+  {
+    type: "nature",
+    icon: "🌋",
+    pref: "kumamoto",
+    question: "世界最大級のカルデラがある活火山「阿蘇山（あそさん）」がある県は？",
+    options: ["福岡県", "熊本県", "宮崎県", "大分県"],
+    answer: 1,
+    explain: "<strong>熊本県</strong>！カルデラとは火山の噴火（ふんか）でできた大きなくぼ地のこと🌋"
+  },
+  {
+    type: "nature",
+    icon: "🌋",
+    pref: "kagoshima",
+    question: "今もけむりをふきだす活火山「桜島（さくらじま）」がある県は？",
+    options: ["長崎県", "熊本県", "宮崎県", "鹿児島県"],
+    answer: 3,
+    explain: "<strong>鹿児島県</strong>！桜島は鹿児島湾にうかぶ島で、市内に火山灰がふることもあるよ🌋"
+  },
+  {
+    type: "nature",
+    icon: "🏔️",
+    pref: "nagano",
+    question: "「日本アルプス」の山々がある、海に面していない県は？",
+    options: ["山梨県", "長野県", "岐阜県", "群馬県"],
+    answer: 1,
+    explain: "<strong>長野県</strong>！3000m級の山々がならぶ「日本の屋根（やね）」とよばれる場所⛰️"
+  },
+  {
+    type: "nature",
+    icon: "🌳",
+    pref: "kagoshima",
+    question: "世界自然遺産「屋久島（やくしま）」がある県は？",
+    options: ["長崎県", "宮崎県", "鹿児島県", "沖縄県"],
+    answer: 2,
+    explain: "<strong>鹿児島県</strong>！屋久島には樹齢（じゅれい）数千年の屋久杉（やくすぎ）がある🌳"
+  },
+  {
+    type: "nature",
+    icon: "🏝️",
+    pref: "okinawa",
+    question: "サンゴしょう・きれいな海・たくさんの島でできている、日本の南にある県は？",
+    options: ["鹿児島県", "宮崎県", "沖縄県", "高知県"],
+    answer: 2,
+    explain: "<strong>沖縄県</strong>！本島・宮古島・石垣島など、たくさんの島からなる🏝️"
+  },
+  {
+    type: "nature",
+    icon: "🌀",
+    pref: "tokushima",
+    question: "「なるとの渦潮（うずしお）」がある県は？",
+    options: ["徳島県", "香川県", "愛媛県", "兵庫県"],
+    answer: 0,
+    explain: "<strong>徳島県</strong>！なるとの渦潮は世界三大潮流のひとつ🌀"
+  },
+  {
+    type: "nature",
+    icon: "🏞️",
+    pref: "kochi",
+    question: "「日本最後の清流（せいりゅう）」とよばれる四万十川（しまんとがわ）がある県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 3,
+    explain: "<strong>高知県</strong>！四万十川は大きなダムがなく、自然のままの川🐠"
+  },
+  {
+    type: "nature",
+    icon: "♨️",
+    pref: "oita",
+    question: "温泉の湧出量（ゆうしゅつりょう）が日本一で、別府（べっぷ）温泉がある県は？",
+    options: ["福岡県", "宮崎県", "大分県", "熊本県"],
+    answer: 2,
+    explain: "<strong>大分県</strong>！「おんせん県」とよばれるくらい温泉が多い♨️"
+  },
+  {
+    type: "nature",
+    icon: "🏝️",
+    pref: "ishikawa",
+    question: "日本海につき出た「能登半島（のとはんとう）」がある県は？",
+    options: ["新潟県", "富山県", "石川県", "福井県"],
+    answer: 2,
+    explain: "<strong>石川県</strong>！能登半島は日本海に大きくつき出た形が特徴的🗾"
+  },
+  {
+    type: "nature",
+    icon: "🌅",
+    pref: "fukui",
+    question: "切り立った崖（がけ）でゆうめいな「東尋坊（とうじんぼう）」がある県は？",
+    options: ["新潟県", "富山県", "石川県", "福井県"],
+    answer: 3,
+    explain: "<strong>福井県</strong>！東尋坊は荒々しい岩がそそり立つ景勝地（けいしょうち）🌊"
+  },
+  {
+    type: "nature",
+    icon: "🌊",
+    pref: "miyagi",
+    question: "日本三景のひとつ「松島（まつしま）」がある県は？",
+    options: ["岩手県", "宮城県", "福島県", "山形県"],
+    answer: 1,
+    explain: "<strong>宮城県</strong>！松島湾には260もの島がうかぶ美しい景色🏝️"
+  },
+  
+  // ===================================================================
+  // 祭り・文化クイズ
+  // ===================================================================
+  {
+    type: "culture",
+    icon: "🏮",
+    pref: "aomori",
+    question: "毎年8月にひらかれる夏祭り「ねぶたまつり」がある県は？",
+    options: ["青森県", "岩手県", "秋田県", "山形県"],
+    answer: 0,
+    explain: "<strong>青森県</strong>！大きな灯ろうの山車（だし）がねりあるく東北を代表する祭り🏮"
+  },
+  {
+    type: "culture",
+    icon: "🎋",
+    pref: "miyagi",
+    question: "毎年8月にひらかれる「七夕（たなばた）まつり」がゆうめいな仙台市がある県は？",
+    options: ["岩手県", "宮城県", "山形県", "福島県"],
+    answer: 1,
+    explain: "<strong>宮城県</strong>！仙台七夕まつりは日本三大七夕まつりのひとつ🎋"
+  },
+  {
+    type: "culture",
+    icon: "👹",
+    pref: "akita",
+    question: "「なまはげ」がゆうめいな県は？",
+    options: ["青森県", "岩手県", "秋田県", "新潟県"],
+    answer: 2,
+    explain: "<strong>秋田県</strong>！男鹿半島（おがはんとう）の伝統行事で、重要無形民俗文化財👹"
+  },
+  {
+    type: "culture",
+    icon: "💃",
+    pref: "tokushima",
+    question: "夏に「阿波（あわ）おどり」がひらかれる県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 0,
+    explain: "<strong>徳島県</strong>！400年以上の歴史がある日本最大級の盆おどり💃"
+  },
+  {
+    type: "culture",
+    icon: "⛩️",
+    pref: "kyoto",
+    question: "金閣寺（きんかくじ）・清水寺（きよみずでら）・舞妓（まいこ）さんがいる古都（こと）はどこ？",
+    options: ["京都府", "大阪府", "奈良県", "兵庫県"],
+    answer: 0,
+    explain: "<strong>京都府</strong>！平安時代から1000年以上日本の首都だった町⛩️"
+  },
+  {
+    type: "culture",
+    icon: "🦌",
+    pref: "nara",
+    question: "大仏（だいぶつ）のある東大寺（とうだいじ）や、しかが街にいるのはどこ？",
+    options: ["三重県", "和歌山県", "奈良県", "京都府"],
+    answer: 2,
+    explain: "<strong>奈良県</strong>！1300年前は日本の首都。東大寺の大仏は世界一大きな金銅仏🦌"
+  },
+  {
+    type: "culture",
+    icon: "🏯",
+    pref: "hyogo",
+    question: "白くてうつくしい世界遺産「姫路城（ひめじじょう）」がある県は？",
+    options: ["京都府", "大阪府", "兵庫県", "岡山県"],
+    answer: 2,
+    explain: "<strong>兵庫県</strong>！別名「白鷺城（しらさぎじょう）」とよばれる🏯"
+  },
+  {
+    type: "culture",
+    icon: "⛩️",
+    pref: "hiroshima",
+    question: "海のうえに赤い鳥居（とりい）がうかぶ「厳島神社（いつくしまじんじゃ）」がある県は？",
+    options: ["岡山県", "山口県", "島根県", "広島県"],
+    answer: 3,
+    explain: "<strong>広島県</strong>！世界遺産で、日本三景のひとつでもあるよ⛩️"
+  },
+  {
+    type: "culture",
+    icon: "⛩️",
+    pref: "shimane",
+    question: "縁結び（えんむすび）の神様でゆうめい「出雲大社（いずもたいしゃ）」がある県は？",
+    options: ["島根県", "鳥取県", "山口県", "広島県"],
+    answer: 0,
+    explain: "<strong>島根県</strong>！しんわの国とよばれ、たくさんの神社がある⛩️"
+  },
+  {
+    type: "culture",
+    icon: "🏯",
+    pref: "tochigi",
+    question: "徳川家康（とくがわいえやす）をまつる「日光東照宮（にっこうとうしょうぐう）」がある県は？",
+    options: ["群馬県", "栃木県", "茨城県", "埼玉県"],
+    answer: 1,
+    explain: "<strong>栃木県</strong>！世界遺産で、ごうかな彫刻（ちょうこく）でゆうめい🏯"
+  },
+  {
+    type: "culture",
+    icon: "🏠",
+    pref: "gifu",
+    question: "世界遺産の合掌造り（がっしょうづくり）の集落「白川郷（しらかわごう）」がある県は？",
+    options: ["長野県", "岐阜県", "愛知県", "三重県"],
+    answer: 1,
+    explain: "<strong>岐阜県</strong>！手を合わせたような形のかやぶき屋根がならぶ風景🏠"
+  },
+  {
+    type: "culture",
+    icon: "🌸",
+    pref: "ishikawa",
+    question: "日本三名園のひとつ「兼六園（けんろくえん）」がある県は？",
+    options: ["新潟県", "富山県", "石川県", "福井県"],
+    answer: 2,
+    explain: "<strong>石川県</strong>！金沢市にある江戸時代からの大名（だいみょう）庭園🌸"
+  },
+  {
+    type: "culture",
+    icon: "🐶",
+    pref: "kumamoto",
+    question: "ゆるキャラの「くまモン」がいる県は？",
+    options: ["福岡県", "熊本県", "宮崎県", "大分県"],
+    answer: 1,
+    explain: "<strong>熊本県</strong>！くまモンは日本で一番ゆうめいなゆるキャラ🐻"
+  },
+  {
+    type: "culture",
+    icon: "♨️",
+    pref: "ehime",
+    question: "夏目漱石（なつめそうせき）の小説「坊ちゃん」の舞台「道後温泉（どうごおんせん）」がある県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 2,
+    explain: "<strong>愛媛県</strong>！日本最古（さいこ）の温泉のひとつといわれる♨️"
+  },
+  {
+    type: "culture",
+    icon: "🍰",
+    pref: "nagasaki",
+    question: "ちゃんぽん・カステラ・ハウステンボスがゆうめいな県は？",
+    options: ["福岡県", "佐賀県", "長崎県", "熊本県"],
+    answer: 2,
+    explain: "<strong>長崎県</strong>！江戸時代に外国とのまどぐちだった出島（でじま）がある🚢"
+  },
+  {
+    type: "culture",
+    icon: "🏺",
+    pref: "saga",
+    question: "「有田焼（ありたやき）」「伊万里焼（いまりやき）」などの焼き物（やきもの）でゆうめいな県は？",
+    options: ["福岡県", "佐賀県", "長崎県", "大分県"],
+    answer: 1,
+    explain: "<strong>佐賀県</strong>！400年以上の歴史をもつ焼き物の産地🏺"
+  },
+  {
+    type: "culture",
+    icon: "🎏",
+    pref: "okinawa",
+    question: "むかし「琉球王国（りゅうきゅうおうこく）」だった、シーサーの守り神でゆうめいな県は？",
+    options: ["鹿児島県", "宮崎県", "沖縄県", "高知県"],
+    answer: 2,
+    explain: "<strong>沖縄県</strong>！日本にもどる前は独立した国だった。首里城がそのなごり🌺"
+  },
+  {
+    type: "culture",
+    icon: "🗼",
+    pref: "tokyo",
+    question: "スカイツリー・浅草寺（せんそうじ）・国会議事堂がある日本の首都は？",
+    options: ["神奈川県", "埼玉県", "千葉県", "東京都"],
+    answer: 3,
+    explain: "<strong>東京都</strong>！日本の政治・経済・文化の中心地🗼"
+  },
+  {
+    type: "culture",
+    icon: "🐟",
+    pref: "osaka",
+    question: "たこ焼き・お好み焼き・道頓堀（どうとんぼり）のグリコの看板がゆうめいな府は？",
+    options: ["京都府", "奈良県", "大阪府", "兵庫県"],
+    answer: 2,
+    explain: "<strong>大阪府</strong>！「くいだおれ」のまち。お笑い文化もゆうめい🐙"
+  }
+];
+
+let currentQ = 0;
+let score = 0;
+let answered = false;
+let activeQuestions = []; // シャッフル後の出題リスト
+let questionCount = 20;   // デフォルト問題数
+
+// 配列をシャッフル（Fisher-Yates）
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// 日本語の文節区切りに改行候補（<wbr>）を入れる
+// 括弧内は壊さず、中点・句読点・括弧前後だけで改行候補を挿入
+function insertBreakHints(text) {
+  if (!text) return '';
+  // HTMLエスケープ
+  let s = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  
+  // 括弧内の部分を一時保護
+  const placeholders = [];
+  s = s.replace(/（[^）]*）/g, m => {
+    placeholders.push(m);
+    return `\x01${placeholders.length - 1}\x02`;
+  });
+  s = s.replace(/\([^)]*\)/g, m => {
+    placeholders.push(m);
+    return `\x01${placeholders.length - 1}\x02`;
+  });
+  
+  // 中点で分割（最重要の区切り）
+  s = s.replace(/・/g, '<wbr>・');
+  // 句読点の後で分割
+  s = s.replace(/([。、！])/g, '$1<wbr>');
+  
+  // 括弧を戻す（前後に改行候補を入れる）
+  s = s.replace(/\x01(\d+)\x02/g, (m, idx) => {
+    return '<wbr>' + placeholders[parseInt(idx)] + '<wbr>';
+  });
+  
+  // 連続する <wbr> をまとめる
+  s = s.replace(/(<wbr>)+/g, '<wbr>');
+  // 先頭・末尾の <wbr> を削除
+  s = s.replace(/^<wbr>/, '').replace(/<wbr>$/, '');
+  
+  return s;
+}
+
+// 問題数選択ボタンの設定
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    questionCount = parseInt(btn.dataset.count);
+  });
+});
+
+// 初期化：地図をロード
+(async function init() {
+  const success = await loadMap();
+  const startBtn = document.getElementById('startBtn');
+  const loadingMsg = document.getElementById('loadingMsg');
+  
+  if (success) {
+    startBtn.textContent = 'スタート！ 🚀';
+    startBtn.disabled = false;
+    loadingMsg.innerHTML = '✅ じゅんびOK！';
+    loadingMsg.style.color = '#4ade80';
+  } else {
+    startBtn.textContent = 'スタート！ 🚀';
+    startBtn.disabled = false;
+    loadingMsg.innerHTML = '⚠️ 地図のよみこみに失敗しました。<br>インターネット接続をかくにんして、ページをリロードしてね。';
+    loadingMsg.style.color = '#c41e3a';
+  }
+})();
+
+function startQuiz() {
+  document.getElementById('titleScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
+  // 47問をシャッフルして、選んだ問題数だけ取り出す
+  activeQuestions = shuffle(questions).slice(0, questionCount);
+  currentQ = 0;
+  score = 0;
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = activeQuestions[currentQ];
+  document.getElementById('questionNum').textContent = `もんだい ${currentQ + 1} / ${activeQuestions.length}`;
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('progressFill').style.width = `${((currentQ) / activeQuestions.length) * 100}%`;
+  
+  // ジャンルバッジ更新
+  const genreBadge = document.getElementById('genreBadge');
+  const genreInfo = {
+    map:       { label: '📍 地図クイズ',     cls: '' },
+    capital:   { label: '🏛️ 県庁所在地クイズ', cls: 'capital' },
+    specialty: { label: '🍱 特産物クイズ',   cls: 'specialty' },
+    nature:    { label: '🏞️ 自然・地形クイズ', cls: 'nature' },
+    culture:   { label: '🎎 祭り・文化クイズ', cls: 'culture' }
+  };
+  const info = genreInfo[q.type] || genreInfo.map;
+  genreBadge.textContent = info.label;
+  genreBadge.className = 'genre-badge ' + info.cls;
+  
+  // 地図クイズかそれ以外かで表示を切り替え
+  const mapContainer = document.getElementById('mapContainer');
+  const iconContainer = document.getElementById('iconContainer');
+  
+  if (q.type === 'map') {
+    mapContainer.style.display = '';
+    iconContainer.style.display = 'none';
+    mapContainer.innerHTML = buildMap(q.pref);
+    setTimeout(addArrowToHighlight, 80);
+  } else {
+    mapContainer.style.display = 'none';
+    iconContainer.style.display = 'flex';
+    document.getElementById('bigIcon').textContent = q.icon || '🗾';
+  }
+  
+  // ヒントは地図クイズだけにある
+  const hintEl = document.getElementById('questionHint');
+  if (q.hint) {
+    hintEl.style.display = '';
+    hintEl.innerHTML = insertBreakHints(q.hint);
+  } else {
+    hintEl.style.display = 'none';
+  }
+  document.getElementById('questionText').innerHTML = insertBreakHints(q.question);
+
+  const optsContainer = document.getElementById('optionsContainer');
+  optsContainer.innerHTML = '';
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(idx, btn);
+    optsContainer.appendChild(btn);
+  });
+
+  document.getElementById('feedback').classList.remove('show');
+}
+
+function selectAnswer(idx, btn) {
+  if (answered) return;
+  answered = true;
+  const q = activeQuestions[currentQ];
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  const feedback = document.getElementById('feedback');
+  const icon = document.getElementById('feedbackIcon');
+  const title = document.getElementById('feedbackTitle');
+  const detail = document.getElementById('feedbackDetail');
+
+  if (idx === q.answer) {
+    btn.classList.add('correct');
+    score++;
+    icon.textContent = '🎉';
+    title.textContent = 'せいかい！';
+    title.className = 'feedback-title correct-text';
+    createSparkles(btn);
+  } else {
+    btn.classList.add('wrong');
+    allBtns[q.answer].classList.add('correct');
+    icon.textContent = '😅';
+    title.textContent = 'ざんねん…';
+    title.className = 'feedback-title wrong-text';
+  }
+
+  detail.innerHTML = q.explain;
+  document.getElementById('scoreNum').textContent = score;
+  setTimeout(() => feedback.classList.add('show'), 600);
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= activeQuestions.length) {
+    showResult();
+  } else {
+    showQuestion();
+  }
+}
+
+function showResult() {
+  document.getElementById('quizScreen').style.display = 'none';
+  document.getElementById('resultScreen').style.display = 'block';
+  document.getElementById('finalScore').textContent = score;
+  // 分母も問題数に合わせて表示
+  const totalEl = document.querySelector('.final-score .total');
+  if (totalEl) totalEl.textContent = ` / ${activeQuestions.length}`;
+
+  let msg, trophy;
+  const pct = (score / activeQuestions.length) * 100;
+  if (pct === 100) {
+    trophy = '👑';
+    msg = 'パーフェクト！！<br>地図マスター！🌟';
+    fireConfetti();
+  } else if (pct >= 80) {
+    trophy = '🏆';
+    msg = 'すごい！中学生レベル！<br>もう一歩でカンペキ！✨';
+    fireConfetti();
+  } else if (pct >= 60) {
+    trophy = '🥈';
+    msg = 'よくがんばったね！<br>4年生としてすばらしい！';
+  } else if (pct >= 40) {
+    trophy = '🥉';
+    msg = 'むずかしかったね！<br>地図帳でかくにんしてみよう！';
+  } else {
+    trophy = '📚';
+    msg = '地図帳とくらべてみよう！<br>くりかえしチャレンジ！';
+  }
+  document.getElementById('trophyIcon').textContent = trophy;
+  document.getElementById('resultMessage').innerHTML = msg;
+}
+
+function restartQuiz() {
+  document.getElementById('resultScreen').style.display = 'none';
+  document.getElementById('titleScreen').style.display = 'block';
+}
+
+function createSparkles(btn) {
+  const rect = btn.getBoundingClientRect();
+  const sparkleChars = ['✨', '⭐', '🌟', '💫'];
+  for (let i = 0; i < 6; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.textContent = sparkleChars[Math.floor(Math.random() * sparkleChars.length)];
+    s.style.left = (rect.left + Math.random() * rect.width) + 'px';
+    s.style.top = (rect.top + Math.random() * rect.height) + 'px';
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1200);
+  }
+}
+
+function fireConfetti() {
+  const colors = ['#4361ee', '#7209b7', '#f72585', '#ffd93d', '#6bdb8f'];
+  for (let i = 0; i < 80; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.top = '-20px';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    c.style.transform = `rotate(${Math.random() * 360}deg)`;
+    document.body.appendChild(c);
+
+    const duration = 2000 + Math.random() * 2000;
+    const drift = (Math.random() - 0.5) * 200;
+    c.animate([
+      { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+      { transform: `translate(${drift}px, 100vh) rotate(${720 + Math.random() * 360}deg)`, opacity: 0 }
+    ], { duration: duration, easing: 'cubic-bezier(0.4, 0, 0.6, 1)' });
+
+    setTimeout(() => c.remove(), duration);
+  }
+}
+</script>
+
+</body>
+</html>
