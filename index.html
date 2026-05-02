@@ -225,6 +225,59 @@
   }
   .mode-btn.active small { color: rgba(255,255,255,0.8); }
 
+  /* ジャンル選択ボタン */
+  .genre-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .genre-btn {
+    background: white;
+    color: var(--dark);
+    font-family: inherit;
+    font-weight: 700;
+    padding: 10px 4px;
+    border: 3px solid var(--dark);
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--dark);
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+  .genre-btn .genre-emoji {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+  .genre-btn .genre-label {
+    font-size: 0.85rem;
+    line-height: 1.1;
+  }
+  .genre-btn small {
+    font-size: 0.65rem;
+    color: #888;
+    font-weight: 400;
+  }
+  .genre-btn:hover:not(.active) {
+    background: var(--cream);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--dark);
+  }
+  .genre-btn.active {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white;
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--dark);
+  }
+  .genre-btn.active small { color: rgba(255,255,255,0.85); }
+  
+  @media (max-width: 380px) {
+    .genre-btns { grid-template-columns: 1fr 1fr; }
+  }
+
   .loading-msg {
     margin-top: 16px;
     font-size: 0.9rem;
@@ -707,12 +760,42 @@
   <div id="titleScreen" class="title-screen">
     <div class="map-emoji">🗾</div>
     <h1>都道府県クイズ</h1>
-    <p class="subtitle">〜 5つのジャンルからミックス出題！ 〜</p>
-    <div class="info-box">
-      <p>📍 地図クイズ ＋ 🏛️ 県庁所在地</p>
-      <p>🍱 特産物 ＋ 🏞️ 自然・地形 ＋ 🎎 祭り・文化</p>
-      <p>レベル：<span class="level-stars">★★★★☆</span></p>
-      <p style="font-size:0.85rem;color:#888;">毎回ランダムでいろんな問題が出るよ。</p>
+    <p class="subtitle">〜 すきなジャンルでチャレンジ！ 〜</p>
+
+    <div class="quiz-mode-select">
+      <p style="margin-bottom:10px;font-weight:700;">ジャンルを選んでね</p>
+      <div class="genre-btns">
+        <button class="genre-btn active" data-genre="all">
+          <span class="genre-emoji">🎲</span>
+          <span class="genre-label">ぜんぶ</span>
+          <small>ランダム</small>
+        </button>
+        <button class="genre-btn" data-genre="map">
+          <span class="genre-emoji">📍</span>
+          <span class="genre-label">地図</span>
+          <small>47問</small>
+        </button>
+        <button class="genre-btn" data-genre="capital">
+          <span class="genre-emoji">🏛️</span>
+          <span class="genre-label">県庁所在地</span>
+          <small>18問</small>
+        </button>
+        <button class="genre-btn" data-genre="specialty">
+          <span class="genre-emoji">🍱</span>
+          <span class="genre-label">特産物</span>
+          <small>19問</small>
+        </button>
+        <button class="genre-btn" data-genre="nature">
+          <span class="genre-emoji">🏞️</span>
+          <span class="genre-label">自然・地形</span>
+          <small>15問</small>
+        </button>
+        <button class="genre-btn" data-genre="culture">
+          <span class="genre-emoji">🎎</span>
+          <span class="genre-label">祭り・文化</span>
+          <small>19問</small>
+        </button>
+      </div>
     </div>
 
     <div class="quiz-mode-select">
@@ -1664,7 +1747,7 @@ const questions = [
   {
     type: "nature",
     icon: "🗻",
-    image: "shizuoka_fuji.jpg",
+    image: "images/shizuoka_fuji.jpg",
     pref: "shizuoka",
     question: "日本一高い山「富士山（ふじさん）」がある県は？（県のとなりは山梨県）",
     options: ["山梨県", "静岡県", "神奈川県", "長野県"],
@@ -1673,7 +1756,7 @@ const questions = [
   },
   {
     type: "nature",
-    image: "shiga_biwako.jpg",
+    image: "images/shiga_biwako.jpg",
     icon: "💧",
     pref: "shiga",
     question: "日本でいちばん大きい湖「びわ湖」がある県は？",
@@ -1683,7 +1766,7 @@ const questions = [
   },
   {
     type: "nature",
-    image: "niigata_shinano.jpg",
+    image: "images/niigata_shinano.jpg",
     icon: "🌊",
     pref: "niigata",
     question: "日本でいちばん長い川「信濃川（しなのがわ）」が河口（かこう）でながれこむ県は？",
@@ -1693,7 +1776,7 @@ const questions = [
   },
   {
     type: "nature",
-    image: "tottori_sakyu.jpg",
+    image: "images/tottori_sakyu.jpg",
     icon: "🐪",
     pref: "tottori",
     question: "日本でいちばん大きい砂丘（さきゅう）がある県は？",
@@ -1703,7 +1786,7 @@ const questions = [
   },
   {
     type: "nature",
-    image: "kumamoto_aso.png",
+    image: "images/kumamoto_aso.png",
     icon: "🌋",
     pref: "kumamoto",
     question: "世界最大級のカルデラがある活火山「阿蘇山（あそさん）」がある県は？",
@@ -1713,7 +1796,7 @@ const questions = [
   },
   {
     type: "nature",
-    image: "kagoshima_sakura.png",
+    image: "images/kagoshima_sakura.png",
     icon: "🌋",
     pref: "kagoshima",
     question: "今もけむりをふきだす活火山「桜島（さくらじま）」がある県は？",
@@ -1723,7 +1806,7 @@ const questions = [
   },
   {
     type: "nature",
-    image: "nagano_alps.jpg",
+    image: "images/nagano_alps.jpg",
     icon: "🏔️",
     pref: "nagano",
     question: "「日本アルプス」の山々がある、海に面していない県は？",
@@ -1985,6 +2068,7 @@ let score = 0;
 let answered = false;
 let activeQuestions = []; // シャッフル後の出題リスト
 let questionCount = 20;   // デフォルト問題数
+let selectedGenre = 'all'; // 選択中のジャンル
 
 // 配列をシャッフル（Fisher-Yates）
 function shuffle(arr) {
@@ -2069,11 +2153,59 @@ function insertBreakHints(text) {
 // 問題数選択ボタンの設定
 document.querySelectorAll('.mode-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    if (btn.disabled) return;
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     questionCount = parseInt(btn.dataset.count);
   });
 });
+
+// ジャンル選択ボタンの設定
+document.querySelectorAll('.genre-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedGenre = btn.dataset.genre;
+    updateQuestionCountOptions();
+  });
+});
+
+// ジャンル選択に応じて問題数の上限を調整
+function updateQuestionCountOptions() {
+  const genreCounts = {
+    all: 118,
+    map: 47,
+    capital: 18,
+    specialty: 19,
+    nature: 15,
+    culture: 19
+  };
+  const max = genreCounts[selectedGenre] || 118;
+  
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    const count = parseInt(btn.dataset.count);
+    if (count > max) {
+      btn.disabled = true;
+      btn.style.opacity = '0.4';
+      btn.style.cursor = 'not-allowed';
+      // activeだったら有効な最大値に移す
+      if (btn.classList.contains('active')) {
+        btn.classList.remove('active');
+        const validBtns = Array.from(document.querySelectorAll('.mode-btn'))
+          .filter(b => parseInt(b.dataset.count) <= max);
+        if (validBtns.length > 0) {
+          const largestValid = validBtns[validBtns.length - 1];
+          largestValid.classList.add('active');
+          questionCount = parseInt(largestValid.dataset.count);
+        }
+      }
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.style.cursor = '';
+    }
+  });
+}
 
 // 初期化：地図をロード
 (async function init() {
@@ -2098,8 +2230,16 @@ function startQuiz() {
   startBgm(); // BGM開始（ユーザー操作後なので再生可能）
   document.getElementById('titleScreen').style.display = 'none';
   document.getElementById('quizScreen').style.display = 'block';
-  // 全問題からシャッフル、選んだ問題数だけ取り出す
-  activeQuestions = shuffle(questions).slice(0, questionCount);
+  
+  // ジャンルでフィルタ → シャッフル → 問題数だけ抽出
+  let pool;
+  if (selectedGenre === 'all') {
+    pool = questions;
+  } else {
+    pool = questions.filter(q => q.type === selectedGenre);
+  }
+  activeQuestions = shuffle(pool).slice(0, questionCount);
+  
   currentQ = 0;
   score = 0;
   showQuestion();
