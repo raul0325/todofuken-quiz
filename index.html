@@ -41,6 +41,38 @@
     overflow-x: hidden;
   }
 
+  /* BGMミュートボタン */
+  .mute-btn {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--dark);
+    box-shadow: 0 3px 0 var(--dark);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    z-index: 1000;
+    transition: all 0.15s;
+  }
+  .mute-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--dark);
+  }
+  .mute-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--dark);
+  }
+  .mute-btn.muted {
+    background: #f5f7fa;
+    opacity: 0.7;
+  }
+
   .container {
     max-width: 760px;
     margin: 0 auto;
@@ -314,6 +346,24 @@
   @keyframes iconBounce {
     0%, 100% { transform: translateY(0) scale(1); }
     50% { transform: translateY(-10px) scale(1.05); }
+  }
+
+  /* 写真表示エリア */
+  .image-container {
+    width: 100%;
+    border-radius: 16px;
+    border: 3px solid var(--dark);
+    overflow: hidden;
+    margin-bottom: 14px;
+    aspect-ratio: 4 / 3;
+    background: #f5f7fa;
+    box-shadow: 0 4px 0 var(--dark);
+  }
+  .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .map-container > svg {
@@ -645,6 +695,14 @@
 </head>
 <body>
 
+<!-- BGM -->
+<audio id="bgm" loop preload="auto" src="Night_Lounge.mp3"></audio>
+
+<!-- ミュートボタン（常に右上） -->
+<button id="muteBtn" class="mute-btn" onclick="toggleMute()" aria-label="BGM切替">
+  <span id="muteIcon">🔊</span>
+</button>
+
 <div class="container">
   <div id="titleScreen" class="title-screen">
     <div class="map-emoji">🗾</div>
@@ -685,6 +743,9 @@
       </div>
       <div class="icon-container" id="iconContainer" style="display:none;">
         <div class="big-icon" id="bigIcon">🗾</div>
+      </div>
+      <div class="image-container" id="imageContainer" style="display:none;">
+        <img id="questionPhoto" src="" alt="">
       </div>
       <p class="hint" id="questionHint"></p>
       <p class="question-text" id="questionText"></p>
@@ -1603,6 +1664,7 @@ const questions = [
   {
     type: "nature",
     icon: "🗻",
+    image: "shizuoka_fuji.jpg",
     pref: "shizuoka",
     question: "日本一高い山「富士山（ふじさん）」がある県は？（県のとなりは山梨県）",
     options: ["山梨県", "静岡県", "神奈川県", "長野県"],
@@ -1611,6 +1673,7 @@ const questions = [
   },
   {
     type: "nature",
+    image: "shiga_biwako.jpg",
     icon: "💧",
     pref: "shiga",
     question: "日本でいちばん大きい湖「びわ湖」がある県は？",
@@ -1620,6 +1683,7 @@ const questions = [
   },
   {
     type: "nature",
+    image: "niigata_shinano.jpg",
     icon: "🌊",
     pref: "niigata",
     question: "日本でいちばん長い川「信濃川（しなのがわ）」が河口（かこう）でながれこむ県は？",
@@ -1629,6 +1693,7 @@ const questions = [
   },
   {
     type: "nature",
+    image: "tottori_sakyu.jpg",
     icon: "🐪",
     pref: "tottori",
     question: "日本でいちばん大きい砂丘（さきゅう）がある県は？",
@@ -1638,6 +1703,7 @@ const questions = [
   },
   {
     type: "nature",
+    image: "kumamoto_aso.png",
     icon: "🌋",
     pref: "kumamoto",
     question: "世界最大級のカルデラがある活火山「阿蘇山（あそさん）」がある県は？",
@@ -1647,6 +1713,7 @@ const questions = [
   },
   {
     type: "nature",
+    image: "kagoshima_sakura.png",
     icon: "🌋",
     pref: "kagoshima",
     question: "今もけむりをふきだす活火山「桜島（さくらじま）」がある県は？",
@@ -1656,6 +1723,7 @@ const questions = [
   },
   {
     type: "nature",
+    image: "nagano_alps.jpg",
     icon: "🏔️",
     pref: "nagano",
     question: "「日本アルプス」の山々がある、海に面していない県は？",
@@ -1928,6 +1996,40 @@ function shuffle(arr) {
   return a;
 }
 
+// BGM制御
+const bgm = document.getElementById('bgm');
+bgm.volume = 0.4; // 控えめな音量
+let isMuted = false;
+let bgmStarted = false;
+
+function startBgm() {
+  if (bgmStarted || isMuted) return;
+  bgm.play().then(() => {
+    bgmStarted = true;
+  }).catch(e => {
+    console.log('BGM再生失敗:', e);
+  });
+}
+
+function toggleMute() {
+  isMuted = !isMuted;
+  const icon = document.getElementById('muteIcon');
+  const btn = document.getElementById('muteBtn');
+  if (isMuted) {
+    bgm.pause();
+    icon.textContent = '🔇';
+    btn.classList.add('muted');
+  } else {
+    icon.textContent = '🔊';
+    btn.classList.remove('muted');
+    if (bgmStarted) {
+      bgm.play().catch(e => console.log(e));
+    } else {
+      startBgm();
+    }
+  }
+}
+
 // 日本語の文節区切りに改行候補（<wbr>）を入れる
 // 括弧内は壊さず、中点・句読点・括弧前後だけで改行候補を挿入
 function insertBreakHints(text) {
@@ -1993,9 +2095,10 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
 })();
 
 function startQuiz() {
+  startBgm(); // BGM開始（ユーザー操作後なので再生可能）
   document.getElementById('titleScreen').style.display = 'none';
   document.getElementById('quizScreen').style.display = 'block';
-  // 47問をシャッフルして、選んだ問題数だけ取り出す
+  // 全問題からシャッフル、選んだ問題数だけ取り出す
   activeQuestions = shuffle(questions).slice(0, questionCount);
   currentQ = 0;
   score = 0;
@@ -2022,18 +2125,29 @@ function showQuestion() {
   genreBadge.textContent = info.label;
   genreBadge.className = 'genre-badge ' + info.cls;
   
-  // 地図クイズかそれ以外かで表示を切り替え
+  // 地図クイズ／画像／アイコンで表示を切り替え
   const mapContainer = document.getElementById('mapContainer');
   const iconContainer = document.getElementById('iconContainer');
+  const imageContainer = document.getElementById('imageContainer');
   
   if (q.type === 'map') {
     mapContainer.style.display = '';
     iconContainer.style.display = 'none';
+    imageContainer.style.display = 'none';
     mapContainer.innerHTML = buildMap(q.pref);
     setTimeout(addArrowToHighlight, 80);
+  } else if (q.image) {
+    // 画像が指定されている問題は写真を表示
+    mapContainer.style.display = 'none';
+    iconContainer.style.display = 'none';
+    imageContainer.style.display = '';
+    document.getElementById('questionPhoto').src = q.image;
+    document.getElementById('questionPhoto').alt = q.question;
   } else {
+    // 画像なしの場合はアイコン表示
     mapContainer.style.display = 'none';
     iconContainer.style.display = 'flex';
+    imageContainer.style.display = 'none';
     document.getElementById('bigIcon').textContent = q.icon || '🗾';
   }
   
