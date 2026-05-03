@@ -79,6 +79,74 @@
     padding: 20px;
   }
 
+  /* テレビ・横長画面用：コンテナを広げる */
+  @media (min-width: 900px) {
+    .container {
+      max-width: 1200px;
+      padding: 24px 40px;
+    }
+  }
+
+  /* 横長画面では問題カードを2カラム配置（地図 ｜ テキスト＋選択肢） */
+  .card-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  @media (min-width: 900px) {
+    .card-layout {
+      flex-direction: row;
+      gap: 24px;
+      align-items: flex-start;
+    }
+    .visual-area {
+      flex: 1 1 50%;
+      min-width: 0;
+    }
+    .text-area {
+      flex: 1 1 50%;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    /* 横長時、文字や選択肢を大きめにしてテレビ視認性UP */
+    .text-area .question-text {
+      font-size: 1.4rem;
+    }
+    .text-area .hint {
+      font-size: 1.05rem;
+    }
+    .options .option-btn {
+      font-size: 1.2rem;
+      padding: 18px 12px;
+    }
+  }
+
+  /* 大画面（テレビ1080p想定）：もっと大きく */
+  @media (min-width: 1280px) {
+    .text-area .question-text {
+      font-size: 1.6rem;
+      line-height: 1.7;
+    }
+    .text-area .hint {
+      font-size: 1.15rem;
+    }
+    .options .option-btn {
+      font-size: 1.35rem;
+      padding: 22px 14px;
+    }
+    .genre-badge {
+      font-size: 1rem;
+      padding: 6px 18px;
+    }
+    .question-number, .score-display {
+      font-size: 1.15rem;
+      padding: 8px 22px;
+    }
+  }
+
   .title-screen {
     text-align: center;
     padding: 30px 20px;
@@ -360,6 +428,15 @@
     justify-content: center;
   }
 
+  /* 大画面では地図のmargin不要 */
+  @media (min-width: 900px) {
+    .map-container,
+    .icon-container,
+    .image-container {
+      margin-bottom: 0;
+    }
+  }
+
   /* ジャンルバッジ */
   .genre-badge {
     display: inline-block;
@@ -409,14 +486,18 @@
     overflow: hidden;
     margin-bottom: 14px;
     aspect-ratio: 4 / 3;
-    background: #f5f7fa;
+    background: #ffffff;
     box-shadow: 0 4px 0 var(--dark);
   }
   .image-container img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
+  }
+  /* 写真（実写）の場合はcoverで全面表示。imgにdata-fit="cover"を付けると有効 */
+  .image-container img[data-fit="cover"] {
+    object-fit: cover;
   }
 
   .map-container > svg {
@@ -821,18 +902,24 @@
     </div>
     <div class="question-card">
       <div class="genre-badge" id="genreBadge">📍 地図クイズ</div>
-      <div class="map-container" id="mapContainer">
-        <div class="map-loading-state"><span class="spinner"></span><br>地図を読みこみ中…</div>
+      <div class="card-layout">
+        <div class="visual-area">
+          <div class="map-container" id="mapContainer">
+            <div class="map-loading-state"><span class="spinner"></span><br>地図を読みこみ中…</div>
+          </div>
+          <div class="icon-container" id="iconContainer" style="display:none;">
+            <div class="big-icon" id="bigIcon">🗾</div>
+          </div>
+          <div class="image-container" id="imageContainer" style="display:none;">
+            <img id="questionPhoto" src="" alt="">
+          </div>
+        </div>
+        <div class="text-area">
+          <p class="hint" id="questionHint"></p>
+          <p class="question-text" id="questionText"></p>
+          <div class="options" id="optionsContainer"></div>
+        </div>
       </div>
-      <div class="icon-container" id="iconContainer" style="display:none;">
-        <div class="big-icon" id="bigIcon">🗾</div>
-      </div>
-      <div class="image-container" id="imageContainer" style="display:none;">
-        <img id="questionPhoto" src="" alt="">
-      </div>
-      <p class="hint" id="questionHint"></p>
-      <p class="question-text" id="questionText"></p>
-      <div class="options" id="optionsContainer"></div>
     </div>
     <div class="feedback" id="feedback">
       <div class="feedback-icon" id="feedbackIcon"></div>
@@ -1375,10 +1462,10 @@ const questions = [
     type: "map",
     pref: "kumamoto",
     hint: "九州地方のまん中",
-    question: "阿蘇山（あそさん）・くまモン・からし蓮根（れんこん）がゆうめいな県は？",
+    question: "阿蘇山（あそさん）・熊本城・からし蓮根（れんこん）がゆうめいな県は？",
     options: ["福岡県", "熊本県", "宮崎県", "大分県"],
     answer: 1,
-    explain: "<strong>熊本県</strong>！阿蘇山は世界最大級のカルデラがある火山。ゆるキャラの「くまモン」もとってもゆうめい🐻"
+    explain: "<strong>熊本県</strong>！阿蘇山は世界最大級のカルデラがある火山。加藤清正（かとうきよまさ）が築いた熊本城も日本三名城のひとつ🏯"
   },
   {
     type: "map",
@@ -1424,6 +1511,8 @@ const questions = [
   {
     type: "capital",
     pref: "miyagi",
+    image: "images/miyagi_sendai.png",
+    imageStyle: "cover",
     question: "県庁所在地が「仙台市（せんだいし）」の県は？",
     options: ["宮城県", "山形県", "福島県", "岩手県"],
     answer: 0,
@@ -1432,6 +1521,8 @@ const questions = [
   {
     type: "capital",
     pref: "ibaraki",
+    image: "images/ibaraki_mito.png",
+    imageStyle: "cover",
     question: "県庁所在地が「水戸市（みとし）」の県は？",
     options: ["群馬県", "栃木県", "茨城県", "千葉県"],
     answer: 2,
@@ -1440,6 +1531,8 @@ const questions = [
   {
     type: "capital",
     pref: "tochigi",
+    image: "images/tochigi_utsunomiya.png",
+    imageStyle: "cover",
     question: "県庁所在地が「宇都宮市（うつのみやし）」の県は？",
     options: ["栃木県", "群馬県", "茨城県", "福島県"],
     answer: 0,
@@ -1448,6 +1541,8 @@ const questions = [
   {
     type: "capital",
     pref: "gunma",
+    image: "images/gunma_maebashi.png",
+    imageStyle: "cover",
     question: "県庁所在地が「前橋市（まえばしし）」の県は？",
     options: ["栃木県", "群馬県", "茨城県", "埼玉県"],
     answer: 1,
@@ -1456,6 +1551,7 @@ const questions = [
   {
     type: "capital",
     image: "images/kanagawa_yokohama.png",
+    imageStyle: "cover",
     pref: "kanagawa",
     question: "県庁所在地が「横浜市（よこはまし）」の県は？",
     options: ["東京都", "神奈川県", "千葉県", "静岡県"],
@@ -1465,6 +1561,8 @@ const questions = [
   {
     type: "capital",
     pref: "ishikawa",
+    image: "images/ishikawa_kanazawa.png",
+    imageStyle: "cover",
     question: "県庁所在地が「金沢市（かなざわし）」の県は？",
     options: ["新潟県", "富山県", "石川県", "福井県"],
     answer: 2,
@@ -1473,6 +1571,8 @@ const questions = [
   {
     type: "capital",
     pref: "aichi",
+    image: "images/aichi_nagoya.png",
+    imageStyle: "cover",
     question: "県庁所在地が「名古屋市（なごやし）」の県は？",
     options: ["愛知県", "岐阜県", "三重県", "静岡県"],
     answer: 0,
@@ -1481,6 +1581,8 @@ const questions = [
   {
     type: "capital",
     pref: "mie",
+    image: "images/mie_tsu.png",
+    imageStyle: "cover",
     question: "県庁所在地が「津市（つし）」の県は？",
     options: ["三重県", "和歌山県", "奈良県", "滋賀県"],
     answer: 0,
@@ -1489,6 +1591,8 @@ const questions = [
   {
     type: "capital",
     pref: "shiga",
+    image: "images/shiga_otsu.png",
+    imageStyle: "cover",
     question: "県庁所在地が「大津市（おおつし）」の県は？",
     options: ["京都府", "奈良県", "滋賀県", "三重県"],
     answer: 2,
@@ -1497,6 +1601,8 @@ const questions = [
   {
     type: "capital",
     pref: "hyogo",
+    image: "images/hyogo_kobe.png",
+    imageStyle: "cover",
     question: "県庁所在地が「神戸市（こうべし）」の県は？",
     options: ["京都府", "大阪府", "兵庫県", "岡山県"],
     answer: 2,
@@ -1505,6 +1611,8 @@ const questions = [
   {
     type: "capital",
     pref: "shimane",
+    image: "images/shimane_matsue.png",
+    imageStyle: "cover",
     question: "県庁所在地が「松江市（まつえし）」の県は？",
     options: ["島根県", "鳥取県", "岡山県", "広島県"],
     answer: 0,
@@ -1513,6 +1621,8 @@ const questions = [
   {
     type: "capital",
     pref: "kagawa",
+    image: "images/kagawa_takamatsu.png",
+    imageStyle: "cover",
     question: "県庁所在地が「高松市（たかまつし）」の県は？",
     options: ["徳島県", "香川県", "愛媛県", "高知県"],
     answer: 1,
@@ -1521,6 +1631,8 @@ const questions = [
   {
     type: "capital",
     pref: "ehime",
+    image: "images/ehime_matsuyama.png",
+    imageStyle: "cover",
     question: "県庁所在地が「松山市（まつやまし）」の県は？",
     options: ["徳島県", "香川県", "愛媛県", "高知県"],
     answer: 2,
@@ -1529,6 +1641,8 @@ const questions = [
   {
     type: "capital",
     pref: "okinawa",
+    image: "images/okinawa_naha.png",
+    imageStyle: "cover",
     question: "県庁所在地が「那覇市（なはし）」の県は？",
     options: ["鹿児島県", "宮崎県", "沖縄県", "高知県"],
     answer: 2,
@@ -1537,6 +1651,8 @@ const questions = [
   {
     type: "capital",
     pref: "iwate",
+    image: "images/iwate_morioka.png",
+    imageStyle: "cover",
     question: "県庁所在地が「盛岡市（もりおかし）」の県は？",
     options: ["青森県", "岩手県", "秋田県", "山形県"],
     answer: 1,
@@ -1545,6 +1661,8 @@ const questions = [
   {
     type: "capital",
     pref: "saitama",
+    image: "images/saitama_saitama.png",
+    imageStyle: "cover",
     question: "県庁所在地が「さいたま市」の県は？",
     options: ["群馬県", "栃木県", "埼玉県", "千葉県"],
     answer: 2,
@@ -1553,6 +1671,8 @@ const questions = [
   {
     type: "capital",
     pref: "yamanashi",
+    image: "images/yamanashi_kofu.png",
+    imageStyle: "cover",
     question: "県庁所在地が「甲府市（こうふし）」の県は？",
     options: ["山梨県", "長野県", "静岡県", "群馬県"],
     answer: 0,
@@ -1561,6 +1681,8 @@ const questions = [
   {
     type: "capital",
     pref: "hokkaido",
+    image: "images/hokkaido_sapporo.png",
+    imageStyle: "cover",
     question: "道庁所在地が「札幌市（さっぽろし）」の都道府県は？",
     options: ["青森県", "北海道", "岩手県", "新潟県"],
     answer: 1,
@@ -1599,6 +1721,8 @@ const questions = [
   },
   {
     type: "specialty",
+    image: "images/shizuoka_tea.png",
+    imageStyle: "cover",
     icon: "🍵",
     pref: "shizuoka",
     question: "お茶（緑茶）の生産が日本一の県は？",
@@ -1608,6 +1732,7 @@ const questions = [
   },
   {
     type: "specialty",
+    image: "images/hyogo_kobe_beef.png",
     icon: "🥩",
     pref: "hyogo",
     question: "「神戸牛（こうべぎゅう）」の産地（さんち）は？",
@@ -1617,6 +1742,7 @@ const questions = [
   },
   {
     type: "specialty",
+    image: "images/mie_matsusakaushi.png",
     icon: "🐂",
     pref: "mie",
     question: "「松阪牛（まつさかうし）」の産地は？",
@@ -1626,6 +1752,7 @@ const questions = [
   },
   {
     type: "specialty",
+    image: "images/kagawa_udon.png",
     icon: "🍜",
     pref: "kagawa",
     question: "「讃岐（さぬき）うどん」がゆうめいな県は？",
@@ -1654,6 +1781,7 @@ const questions = [
   {
     type: "specialty",
     image: "images/hiroshima_kaki.png",
+    imageStyle: "cover",
     icon: "🦪",
     pref: "hiroshima",
     question: "カキ（牡蠣）の生産が日本一の県は？",
@@ -1663,6 +1791,8 @@ const questions = [
   },
   {
     type: "specialty",
+    image: "images/wakayama_fruits.png",
+    imageStyle: "cover",
     icon: "🍊",
     pref: "wakayama",
     question: "みかん・うめの生産が日本一の県は？",
@@ -1672,6 +1802,8 @@ const questions = [
   },
   {
     type: "specialty",
+    image: "images/yamanashi_fruits.png",
+    imageStyle: "cover",
     icon: "🍇",
     pref: "yamanashi",
     question: "ぶどう・ももの生産が日本一の県は？",
@@ -1681,6 +1813,8 @@ const questions = [
   },
   {
     type: "specialty",
+    image: "images/nagano_lettuce.png",
+    imageStyle: "cover",
     icon: "🥬",
     pref: "nagano",
     question: "レタスの生産が日本一の県は？",
@@ -1708,6 +1842,8 @@ const questions = [
   },
   {
     type: "specialty",
+    image: "images/miyazaki_mango.png",
+    imageStyle: "contain",
     icon: "🥭",
     pref: "miyazaki",
     question: "「太陽のたまご」というブランドのマンゴーがゆうめいな県は？",
@@ -1726,6 +1862,7 @@ const questions = [
   },
   {
     type: "specialty",
+    image: "images/chiba_peanuts.jpg",
     icon: "🥜",
     pref: "chiba",
     question: "らっかせい（ピーナッツ）の生産が日本一の県は？",
@@ -1750,6 +1887,7 @@ const questions = [
     type: "nature",
     icon: "🗻",
     image: "images/shizuoka_fuji.jpg",
+    imageStyle: "cover",
     pref: "shizuoka",
     question: "日本一高い山「富士山（ふじさん）」がある県は？（県のとなりは山梨県）",
     options: ["山梨県", "静岡県", "神奈川県", "長野県"],
@@ -1759,6 +1897,7 @@ const questions = [
   {
     type: "nature",
     image: "images/shiga_biwako.jpg",
+    imageStyle: "cover",
     icon: "💧",
     pref: "shiga",
     question: "日本でいちばん大きい湖「びわ湖」がある県は？",
@@ -1769,6 +1908,7 @@ const questions = [
   {
     type: "nature",
     image: "images/niigata_shinano.jpg",
+    imageStyle: "cover",
     icon: "🌊",
     pref: "niigata",
     question: "日本でいちばん長い川「信濃川（しなのがわ）」が河口（かこう）でながれこむ県は？",
@@ -1779,6 +1919,7 @@ const questions = [
   {
     type: "nature",
     image: "images/tottori_sakyu.jpg",
+    imageStyle: "cover",
     icon: "🐪",
     pref: "tottori",
     question: "日本でいちばん大きい砂丘（さきゅう）がある県は？",
@@ -1789,6 +1930,7 @@ const questions = [
   {
     type: "nature",
     image: "images/kumamoto_aso.png",
+    imageStyle: "cover",
     icon: "🌋",
     pref: "kumamoto",
     question: "世界最大級のカルデラがある活火山「阿蘇山（あそさん）」がある県は？",
@@ -1799,6 +1941,7 @@ const questions = [
   {
     type: "nature",
     image: "images/kagoshima_sakura.png",
+    imageStyle: "cover",
     icon: "🌋",
     pref: "kagoshima",
     question: "今もけむりをふきだす活火山「桜島（さくらじま）」がある県は？",
@@ -1809,6 +1952,7 @@ const questions = [
   {
     type: "nature",
     image: "images/nagano_alps.jpg",
+    imageStyle: "cover",
     icon: "🏔️",
     pref: "nagano",
     question: "「日本アルプス」の山々がある、海に面していない県は？",
@@ -1819,6 +1963,7 @@ const questions = [
   {
     type: "nature",
     image: "images/kagoshima_yaku.png",
+    imageStyle: "cover",
     icon: "🌳",
     pref: "kagoshima",
     question: "世界自然遺産「屋久島（やくしま）」がある県は？",
@@ -1829,6 +1974,7 @@ const questions = [
   {
     type: "nature",
     image: "images/okinawa_umi.png",
+    imageStyle: "cover",
     icon: "🏝️",
     pref: "okinawa",
     question: "サンゴしょう・きれいな海・たくさんの島でできている、日本の南にある県は？",
@@ -1848,6 +1994,7 @@ const questions = [
   {
     type: "nature",
     image: "images/kochi_shimanto.png",
+    imageStyle: "cover",
     icon: "🏞️",
     pref: "kochi",
     question: "「日本最後の清流（せいりゅう）」とよばれる四万十川（しまんとがわ）がある県は？",
@@ -1866,6 +2013,7 @@ const questions = [
   },
   {
     type: "nature",
+    image: "images/ishikawa_noto.png",
     icon: "🏝️",
     pref: "ishikawa",
     question: "日本海につき出た「能登半島（のとはんとう）」がある県は？",
@@ -1876,6 +2024,7 @@ const questions = [
   {
     type: "nature",
     image: "images/fukui_tojinbo.png",
+    imageStyle: "cover",
     icon: "🌅",
     pref: "fukui",
     question: "切り立った崖（がけ）でゆうめいな「東尋坊（とうじんぼう）」がある県は？",
@@ -1916,6 +2065,7 @@ const questions = [
   },
   {
     type: "culture",
+    image: "images/akita_namahage.png",
     icon: "👹",
     pref: "akita",
     question: "「なまはげ」がゆうめいな県は？",
@@ -1943,6 +2093,8 @@ const questions = [
   },
   {
     type: "culture",
+    image: "images/nara_todaiji.png",
+    imageStyle: "cover",
     icon: "🦌",
     pref: "nara",
     question: "大仏（だいぶつ）のある東大寺（とうだいじ）や、しかが街にいるのはどこ？",
@@ -1952,6 +2104,7 @@ const questions = [
   },
   {
     type: "culture",
+    image: "images/hyogo_himeji.png",
     icon: "🏯",
     pref: "hyogo",
     question: "白くてうつくしい世界遺産「姫路城（ひめじじょう）」がある県は？",
@@ -1970,6 +2123,7 @@ const questions = [
   },
   {
     type: "culture",
+    image: "images/shimane_izumo.png",
     icon: "⛩️",
     pref: "shimane",
     question: "縁結び（えんむすび）の神様でゆうめい「出雲大社（いずもたいしゃ）」がある県は？",
@@ -1988,6 +2142,7 @@ const questions = [
   },
   {
     type: "culture",
+    image: "images/gifu_shirakawago.png",
     icon: "🏠",
     pref: "gifu",
     question: "世界遺産の合掌造り（がっしょうづくり）の集落「白川郷（しらかわごう）」がある県は？",
@@ -1997,6 +2152,7 @@ const questions = [
   },
   {
     type: "culture",
+    image: "images/ishikawa_kenrokuen.png",
     icon: "🌸",
     pref: "ishikawa",
     question: "日本三名園のひとつ「兼六園（けんろくえん）」がある県は？",
@@ -2006,15 +2162,18 @@ const questions = [
   },
   {
     type: "culture",
-    icon: "🐶",
+    image: "images/kumamoto_castle.png",
+    imageStyle: "cover",
+    icon: "🏯",
     pref: "kumamoto",
-    question: "ゆるキャラの「くまモン」がいる県は？",
+    question: "日本三名城（さんめいじょう）のひとつで、加藤清正（かとうきよまさ）が築（きず）いた黒い大きな城がある県は？",
     options: ["福岡県", "熊本県", "宮崎県", "大分県"],
     answer: 1,
-    explain: "<strong>熊本県</strong>！くまモンは日本で一番ゆうめいなゆるキャラ🐻"
+    explain: "<strong>熊本県</strong>！熊本城は黒い壁が特徴の名城。2016年の熊本地震で大きな被害（ひがい）を受けたけど、修復（しゅうふく）が進んでいるよ🏯"
   },
   {
     type: "culture",
+    image: "images/ehime_dogo.png",
     icon: "♨️",
     pref: "ehime",
     question: "夏目漱石（なつめそうせき）の小説「坊ちゃん」の舞台「道後温泉（どうごおんせん）」がある県は？",
@@ -2042,6 +2201,7 @@ const questions = [
   },
   {
     type: "culture",
+    image: "images/okinawa_shisa.png",
     icon: "🎏",
     pref: "okinawa",
     question: "むかし「琉球王国（りゅうきゅうおうこく）」だった、シーサーの守り神でゆうめいな県は？",
@@ -2051,6 +2211,8 @@ const questions = [
   },
   {
     type: "culture",
+    image: "images/tokyo_sensoji.png",
+    imageStyle: "cover",
     icon: "🗼",
     pref: "tokyo",
     question: "スカイツリー・浅草寺（せんそうじ）・国会議事堂がある日本の首都は？",
@@ -2067,6 +2229,719 @@ const questions = [
     answer: 2,
     explain: "<strong>大阪府</strong>！「くいだおれ」のまち。お笑い文化もゆうめい🐙"
   }
+,
+
+  // ===== 北海道 (1問追加) =====
+  {
+    type: "culture",
+    icon: "❄️",
+    pref: "hokkaido",
+    question: "毎年2月に「雪まつり」がひらかれる、北の大都市があるのは？",
+    options: ["青森県", "北海道", "岩手県", "新潟県"],
+    answer: 1,
+    explain: "<strong>北海道</strong>！札幌の雪まつりは大きな雪像（せつぞう）がならぶ世界的なイベント❄️"
+  },
+  
+  // ===== 青森 (1問追加) =====
+  {
+    type: "specialty",
+    icon: "🐟",
+    pref: "aomori",
+    question: "本州の一番北、大間（おおま）でとれるマグロがゆうめいな県は？",
+    options: ["青森県", "岩手県", "秋田県", "宮城県"],
+    answer: 0,
+    explain: "<strong>青森県</strong>！大間（おおま）のマグロは「黒いダイヤ」とよばれる高級品🐟"
+  },
+  
+  // ===== 岩手 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "🍜",
+    pref: "iwate",
+    question: "「わんこそば」「冷麺（れいめん）」「じゃじゃめん」の麺料理三大ご当地グルメがある県は？",
+    options: ["青森県", "岩手県", "秋田県", "宮城県"],
+    answer: 1,
+    explain: "<strong>岩手県</strong>！盛岡（もりおか）市は麺料理の街として有名🥣"
+  },
+  {
+    type: "culture",
+    icon: "🏔️",
+    pref: "iwate",
+    question: "宮沢賢治（みやざわけんじ）の出身地で、「銀河鉄道の夜」のふるさとといわれる県は？",
+    options: ["青森県", "岩手県", "秋田県", "山形県"],
+    answer: 1,
+    explain: "<strong>岩手県</strong>！宮沢賢治は花巻市の出身。本州一広い県でもある📚"
+  },
+  
+  // ===== 秋田 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "🐶",
+    pref: "akita",
+    question: "忠犬ハチ公（ちゅうけんはちこう）でゆうめいな日本犬の出身地はどこ？",
+    options: ["青森県", "岩手県", "秋田県", "山形県"],
+    answer: 2,
+    explain: "<strong>秋田県</strong>！秋田犬は日本犬の中でも大きな種類で、天然記念物にもなっているよ🐕"
+  },
+  {
+    type: "nature",
+    icon: "💧",
+    pref: "akita",
+    question: "日本一深い湖「田沢湖（たざわこ）」がある県は？",
+    options: ["青森県", "岩手県", "秋田県", "山形県"],
+    answer: 2,
+    explain: "<strong>秋田県</strong>！田沢湖は深さ423mで日本一深い湖。コバルトブルーの水が美しい💎"
+  },
+  
+  // ===== 山形 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "🥩",
+    pref: "yamagata",
+    question: "「米沢牛（よねざわぎゅう）」がゆうめいな東北の県は？",
+    options: ["山形県", "宮城県", "福島県", "岩手県"],
+    answer: 0,
+    explain: "<strong>山形県</strong>！米沢牛は日本三大和牛のひとつといわれる高級牛肉🥩"
+  },
+  {
+    type: "culture",
+    icon: "🎋",
+    pref: "yamagata",
+    question: "「花笠（はながさ）まつり」がゆうめいな東北の県は？",
+    options: ["青森県", "秋田県", "山形県", "福島県"],
+    answer: 2,
+    explain: "<strong>山形県</strong>！花笠まつりは「ヤッショ、マカショ！」のかけ声で踊る夏まつり🌼"
+  },
+  
+  // ===== 福島 (3問追加) =====
+  {
+    type: "specialty",
+    icon: "🍑",
+    pref: "fukushima",
+    question: "ももの生産が日本2位の東北の県は？",
+    options: ["山形県", "宮城県", "福島県", "新潟県"],
+    answer: 2,
+    explain: "<strong>福島県</strong>！「あかつき」というブランドのももが有名🍑"
+  },
+  {
+    type: "culture",
+    icon: "⚔️",
+    pref: "fukushima",
+    question: "幕末に「白虎隊（びゃっこたい）」の悲劇があった、会津若松（あいづわかまつ）市がある県は？",
+    options: ["山形県", "宮城県", "福島県", "新潟県"],
+    answer: 2,
+    explain: "<strong>福島県</strong>！白虎隊は16〜17才の少年武士の部隊。鶴ヶ城（つるがじょう）も有名🏯"
+  },
+  {
+    type: "specialty",
+    icon: "🍶",
+    pref: "fukushima",
+    question: "「日本酒・ラーメン・喜多方（きたかた）ラーメン」がゆうめいな東北の県は？",
+    options: ["山形県", "宮城県", "福島県", "栃木県"],
+    answer: 2,
+    explain: "<strong>福島県</strong>！喜多方ラーメンは日本三大ラーメンのひとつ。日本酒のおいしい産地でもあるよ🍜"
+  },
+  
+  // ===== 茨城 (1問追加) =====
+  {
+    type: "culture",
+    icon: "🌸",
+    pref: "ibaraki",
+    question: "日本三名園のひとつ「偕楽園（かいらくえん）」と梅でゆうめいな県は？",
+    options: ["群馬県", "栃木県", "茨城県", "千葉県"],
+    answer: 2,
+    explain: "<strong>茨城県</strong>！偕楽園は3000本の梅が咲く日本三名園のひとつ🌸"
+  },
+  
+  // ===== 群馬 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "🥬",
+    pref: "gunma",
+    question: "キャベツの生産が日本一でゆうめいな関東の内陸県は？",
+    options: ["群馬県", "栃木県", "茨城県", "埼玉県"],
+    answer: 0,
+    explain: "<strong>群馬県</strong>！嬬恋村（つまごいむら）の高原キャベツは日本一の生産量🥬"
+  },
+  {
+    type: "culture",
+    icon: "🏭",
+    pref: "gunma",
+    question: "世界遺産の「富岡製糸場（とみおかせいしじょう）」がある県は？",
+    options: ["群馬県", "栃木県", "茨城県", "埼玉県"],
+    answer: 0,
+    explain: "<strong>群馬県</strong>！明治時代の絹（きぬ）の工場で、日本の近代化（きんだいか）を支えた施設🏭"
+  },
+  
+  // ===== 埼玉 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "🥖",
+    pref: "saitama",
+    question: "「深谷（ふかや）ねぎ」「狭山茶（さやまちゃ）」がゆうめいな関東の県は？",
+    options: ["群馬県", "栃木県", "埼玉県", "千葉県"],
+    answer: 2,
+    explain: "<strong>埼玉県</strong>！深谷ねぎは甘くてやわらかいことで有名。狭山茶も日本三大銘茶のひとつ🍵"
+  },
+  {
+    type: "culture",
+    icon: "🏘️",
+    pref: "saitama",
+    question: "「小江戸（こえど）」とよばれる古い町並みが残る川越（かわごえ）市がある県は？",
+    options: ["群馬県", "栃木県", "埼玉県", "千葉県"],
+    answer: 2,
+    explain: "<strong>埼玉県</strong>！川越は江戸時代の風情（ふぜい）が残る町。「時の鐘（ときのかね）」がシンボル🔔"
+  },
+  
+  // ===== 千葉 (2問追加) =====
+  {
+    type: "culture",
+    icon: "✈️",
+    pref: "chiba",
+    question: "日本の空のげんかん「成田空港（なりたくうこう）」がある県は？",
+    options: ["神奈川県", "千葉県", "茨城県", "東京都"],
+    answer: 1,
+    explain: "<strong>千葉県</strong>！成田国際空港は日本一の国際線の発着数🛬"
+  },
+  {
+    type: "specialty",
+    icon: "🐟",
+    pref: "chiba",
+    question: "しょうゆの生産が日本一で、銚子（ちょうし）市がある県は？",
+    options: ["神奈川県", "千葉県", "茨城県", "東京都"],
+    answer: 1,
+    explain: "<strong>千葉県</strong>！銚子・野田（のだ）市はしょうゆの大産地。日本のしょうゆの約3割がここ🍶"
+  },
+  
+  // ===== 東京 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "🍣",
+    pref: "tokyo",
+    question: "築地（つきじ）・豊洲（とよす）市場がある日本の首都は？",
+    options: ["神奈川県", "埼玉県", "千葉県", "東京都"],
+    answer: 3,
+    explain: "<strong>東京都</strong>！豊洲市場は世界一の魚市場。築地は今も場外市場でにぎわう🐟"
+  },
+  {
+    type: "nature",
+    icon: "🏝️",
+    pref: "tokyo",
+    question: "世界自然遺産の「小笠原諸島（おがさわらしょとう）」がある都道府県は？",
+    options: ["神奈川県", "沖縄県", "鹿児島県", "東京都"],
+    answer: 3,
+    explain: "<strong>東京都</strong>！小笠原は東京から南へ1000km。「東洋のガラパゴス」とよばれる🐢"
+  },
+  
+  // ===== 神奈川 (2問追加) =====
+  {
+    type: "culture",
+    icon: "🗿",
+    pref: "kanagawa",
+    question: "「鎌倉大仏（かまくらだいぶつ）」がある関東の県は？",
+    options: ["東京都", "神奈川県", "千葉県", "静岡県"],
+    answer: 1,
+    explain: "<strong>神奈川県</strong>！鎌倉大仏は高さ約11mの青銅製。鎌倉時代に作られた国宝🗿"
+  },
+  {
+    type: "specialty",
+    icon: "🥟",
+    pref: "kanagawa",
+    question: "「シュウマイ」「中華街」がゆうめいな県は？",
+    options: ["東京都", "神奈川県", "千葉県", "兵庫県"],
+    answer: 1,
+    explain: "<strong>神奈川県</strong>！横浜中華街は日本最大の中華街。シュウマイの「崎陽軒（きようけん）」が有名🥟"
+  },
+  
+  // ===== 新潟 (1問追加) =====
+  {
+    type: "culture",
+    icon: "🍶",
+    pref: "niigata",
+    question: "日本酒の蔵元（くらもと）が日本一多い、お米どころの県は？",
+    options: ["新潟県", "秋田県", "山形県", "富山県"],
+    answer: 0,
+    explain: "<strong>新潟県</strong>！お米と雪解け水（ゆきどけみず）でおいしい日本酒が作られる🍶"
+  },
+  
+  // ===== 富山 (3問追加) =====
+  {
+    type: "specialty",
+    icon: "🦑",
+    pref: "toyama",
+    question: "「ホタルイカ」と「ますずし」がゆうめいな日本海がわの県は？",
+    options: ["新潟県", "富山県", "石川県", "福井県"],
+    answer: 1,
+    explain: "<strong>富山県</strong>！ホタルイカは富山湾の春の風物詩で、青く光る不思議な生き物🦑"
+  },
+  {
+    type: "nature",
+    icon: "🏔️",
+    pref: "toyama",
+    question: "「立山連峰（たてやまれんぽう）」と「黒部峡谷（くろべきょうこく）」がある県は？",
+    options: ["新潟県", "富山県", "石川県", "長野県"],
+    answer: 1,
+    explain: "<strong>富山県</strong>！3000m級の立山連峰は日本三霊山（れいざん）のひとつ⛰️"
+  },
+  {
+    type: "specialty",
+    icon: "💊",
+    pref: "toyama",
+    question: "江戸時代から続く「越中（えっちゅう）の薬売り」でゆうめいな日本海がわの県は？",
+    options: ["新潟県", "富山県", "石川県", "福井県"],
+    answer: 1,
+    explain: "<strong>富山県</strong>！「越中富山（えっちゅうとやま）の薬売り」として家庭薬の産地として有名💊"
+  },
+  
+  // ===== 福井 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "👓",
+    pref: "fukui",
+    question: "めがねフレームの生産が日本一の県は？",
+    options: ["新潟県", "富山県", "石川県", "福井県"],
+    answer: 3,
+    explain: "<strong>福井県</strong>！鯖江（さばえ）市は世界三大めがね産地のひとつ。日本のめがねの90%以上がここ👓"
+  },
+  {
+    type: "culture",
+    icon: "🦕",
+    pref: "fukui",
+    question: "恐竜（きょうりゅう）の化石（かせき）がたくさん見つかり、「恐竜博物館」がある県は？",
+    options: ["新潟県", "富山県", "石川県", "福井県"],
+    answer: 3,
+    explain: "<strong>福井県</strong>！日本で発見された恐竜の化石の8割がここ。恐竜王国とよばれる🦖"
+  },
+  
+  // ===== 山梨 (1問追加) =====
+  {
+    type: "culture",
+    icon: "⚔️",
+    pref: "yamanashi",
+    question: "戦国武将「武田信玄（たけだしんげん）」の出身地で、ほうとうがゆうめいな県は？",
+    options: ["山梨県", "長野県", "静岡県", "群馬県"],
+    answer: 0,
+    explain: "<strong>山梨県</strong>！武田信玄は戦国時代の名将。「ほうとう」は太い麺の郷土料理🍲"
+  },
+  
+  // ===== 長野 (1問追加) =====
+  {
+    type: "specialty",
+    icon: "🍎",
+    pref: "nagano",
+    question: "りんごの生産が日本2位、そばがおいしい高原の県は？",
+    options: ["山梨県", "長野県", "岐阜県", "群馬県"],
+    answer: 1,
+    explain: "<strong>長野県</strong>！信州そばも有名。冷涼な気候でおいしい果物が育つ🌾"
+  },
+  
+  // ===== 岐阜 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "🐟",
+    pref: "gifu",
+    question: "長良川（ながらがわ）の「鵜飼い（うかい）」が1300年続く県は？",
+    options: ["長野県", "岐阜県", "愛知県", "三重県"],
+    answer: 1,
+    explain: "<strong>岐阜県</strong>！鵜飼いは鵜（う）という鳥を使ったあゆ漁。長良川（ながらがわ）の名物🐟"
+  },
+  {
+    type: "culture",
+    icon: "🏯",
+    pref: "gifu",
+    question: "戦国武将「織田信長（おだのぶなが）」が天下統一を目指した城下町、長良川（ながらがわ）が流れる県は？",
+    options: ["長野県", "岐阜県", "愛知県", "三重県"],
+    answer: 1,
+    explain: "<strong>岐阜県</strong>！岐阜城は山頂にあるお城。戦国時代の重要な拠点（きょてん）だった🏯"
+  },
+  
+  // ===== 静岡 (1問追加) =====
+  {
+    type: "specialty",
+    icon: "🐟",
+    pref: "shizuoka",
+    question: "うなぎの生産がさかんな浜名湖（はまなこ）がある県は？",
+    options: ["神奈川県", "静岡県", "愛知県", "山梨県"],
+    answer: 1,
+    explain: "<strong>静岡県</strong>！浜名湖はうなぎの養殖（ようしょく）で有名。うな重がおいしい🍱"
+  },
+  
+  // ===== 愛知 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "🚗",
+    pref: "aichi",
+    question: "自動車の生産が日本一で、トヨタ自動車の本社がある県は？",
+    options: ["愛知県", "岐阜県", "三重県", "静岡県"],
+    answer: 0,
+    explain: "<strong>愛知県</strong>！日本の自動車生産の約半分がここ。豊田市（とよたし）が拠点🚗"
+  },
+  {
+    type: "culture",
+    icon: "🏯",
+    pref: "aichi",
+    question: "金のしゃちほこでゆうめい「名古屋城」がある県は？",
+    options: ["愛知県", "岐阜県", "三重県", "兵庫県"],
+    answer: 0,
+    explain: "<strong>愛知県</strong>！名古屋城の金のしゃちほこは江戸時代から続くシンボル✨"
+  },
+  
+  // ===== 三重 (1問追加) =====
+  {
+    type: "culture",
+    icon: "🥷",
+    pref: "mie",
+    question: "「忍者（にんじゃ）の里」伊賀（いが）がある県は？",
+    options: ["奈良県", "和歌山県", "三重県", "滋賀県"],
+    answer: 2,
+    explain: "<strong>三重県</strong>！伊賀流忍者の発祥地（はっしょうち）。伊賀流忍者博物館もあるよ🥷"
+  },
+  
+  // ===== 滋賀 (1問追加) =====
+  {
+    type: "culture",
+    icon: "🏯",
+    pref: "shiga",
+    question: "国宝の「彦根城（ひこねじょう）」と、ゆるキャラ「ひこにゃん」がいる県は？",
+    options: ["京都府", "奈良県", "滋賀県", "三重県"],
+    answer: 2,
+    explain: "<strong>滋賀県</strong>！彦根城は天守が国宝に指定されている貴重なお城🏯"
+  },
+  
+  // ===== 京都 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "🍡",
+    pref: "kyoto",
+    question: "抹茶（まっちゃ）スイーツや八ツ橋（やつはし）がゆうめいな府は？",
+    options: ["京都府", "大阪府", "奈良県", "兵庫県"],
+    answer: 0,
+    explain: "<strong>京都府</strong>！宇治抹茶は世界でゆうめい。和菓子の伝統文化が今も生きている🍵"
+  },
+  {
+    type: "nature",
+    icon: "🌊",
+    pref: "kyoto",
+    question: "日本三景のひとつ「天橋立（あまのはしだて）」がある府は？",
+    options: ["京都府", "大阪府", "兵庫県", "鳥取県"],
+    answer: 0,
+    explain: "<strong>京都府</strong>！天橋立は日本海に細長くのびる砂州（さす）の絶景🌊"
+  },
+  
+  // ===== 大阪 (2問追加) =====
+  {
+    type: "culture",
+    icon: "🏯",
+    pref: "osaka",
+    question: "豊臣秀吉（とよとみひでよし）が築いた、緑色の屋根の有名なお城があるのは？",
+    options: ["京都府", "大阪府", "兵庫県", "奈良県"],
+    answer: 1,
+    explain: "<strong>大阪府</strong>！大阪城は日本三名城のひとつ。緑色の屋根と金のしゃちほこが特徴🏯"
+  },
+  {
+    type: "culture",
+    icon: "🎢",
+    pref: "osaka",
+    question: "USJ（ユニバーサル・スタジオ・ジャパン）があるのは？",
+    options: ["京都府", "大阪府", "兵庫県", "東京都"],
+    answer: 1,
+    explain: "<strong>大阪府</strong>！USJは日本最大級のテーマパーク🎢"
+  },
+  
+  // ===== 奈良 (2問追加) =====
+  {
+    type: "culture",
+    icon: "🏛️",
+    pref: "nara",
+    question: "世界最古の木造建築（もくぞうけんちく）「法隆寺（ほうりゅうじ）」がある県は？",
+    options: ["三重県", "和歌山県", "奈良県", "京都府"],
+    answer: 2,
+    explain: "<strong>奈良県</strong>！法隆寺は約1400年前に建てられた、世界最古の木造建築物🏛️"
+  },
+  {
+    type: "specialty",
+    icon: "🍵",
+    pref: "nara",
+    question: "「柿の葉ずし（かきのはずし）」が郷土料理（きょうどりょうり）でゆうめいな、しかが街にいる県は？",
+    options: ["三重県", "和歌山県", "奈良県", "京都府"],
+    answer: 2,
+    explain: "<strong>奈良県</strong>！柿の葉でくるんだ押し寿司が郷土料理。奈良漬けも有名🍣"
+  },
+  
+  // ===== 和歌山 (2問追加) =====
+  {
+    type: "culture",
+    icon: "⛩️",
+    pref: "wakayama",
+    question: "弘法大師空海（こうぼうだいしくうかい）が開いた「高野山（こうやさん）」がある県は？",
+    options: ["三重県", "和歌山県", "奈良県", "兵庫県"],
+    answer: 1,
+    explain: "<strong>和歌山県</strong>！高野山は1200年の歴史をもつ仏教の聖地。世界遺産にも登録されている⛩️"
+  },
+  {
+    type: "specialty",
+    icon: "🍑",
+    pref: "wakayama",
+    question: "うめの生産が日本一で「南高梅（なんこうばい）」がゆうめいな県は？",
+    options: ["三重県", "和歌山県", "奈良県", "静岡県"],
+    answer: 1,
+    explain: "<strong>和歌山県</strong>！南高梅は梅干しの最高級ブランド。みなべ町・田辺市が産地🍑"
+  },
+  
+  // ===== 鳥取 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "🍐",
+    pref: "tottori",
+    question: "「二十世紀梨（にじっせいきなし）」の生産が有名な県は？",
+    options: ["島根県", "鳥取県", "岡山県", "山口県"],
+    answer: 1,
+    explain: "<strong>鳥取県</strong>！20世紀梨は緑色のなしで、シャリッとした食感がおいしい🍐"
+  },
+  {
+    type: "culture",
+    icon: "📚",
+    pref: "tottori",
+    question: "漫画「名探偵コナン」「ゲゲゲの鬼太郎」の作者がでた、漫画家が多く育った県は？",
+    options: ["島根県", "鳥取県", "岡山県", "山口県"],
+    answer: 1,
+    explain: "<strong>鳥取県</strong>！コナンの青山剛昌（あおやまごうしょう）、鬼太郎の水木しげるが鳥取出身📚"
+  },
+  
+  // ===== 島根 (1問追加) =====
+  {
+    type: "specialty",
+    icon: "🐚",
+    pref: "shimane",
+    question: "宍道湖（しんじこ）でとれる「しじみ」がゆうめいな県は？",
+    options: ["島根県", "鳥取県", "岡山県", "広島県"],
+    answer: 0,
+    explain: "<strong>島根県</strong>！宍道湖のしじみは日本一の漁獲量。みそ汁の具に最高🍲"
+  },
+  
+  // ===== 岡山 (3問追加) =====
+  {
+    type: "culture",
+    icon: "🍑",
+    pref: "okayama",
+    question: "「ももたろう」の伝説があり、きびだんごがゆうめいな県は？",
+    options: ["広島県", "岡山県", "鳥取県", "島根県"],
+    answer: 1,
+    explain: "<strong>岡山県</strong>！ももたろう伝説の発祥地（はっしょうち）。きびだんごは郷土菓子🍡"
+  },
+  {
+    type: "specialty",
+    icon: "🍇",
+    pref: "okayama",
+    question: "「マスカット」「白桃（はくとう）」の生産がさかんな県は？",
+    options: ["広島県", "岡山県", "山口県", "鳥取県"],
+    answer: 1,
+    explain: "<strong>岡山県</strong>！晴れの日が多いのでフルーツがおいしく育つ「フルーツ王国」🍇"
+  },
+  {
+    type: "culture",
+    icon: "🌸",
+    pref: "okayama",
+    question: "日本三名園のひとつ「後楽園（こうらくえん）」がある県は？",
+    options: ["広島県", "岡山県", "山口県", "島根県"],
+    answer: 1,
+    explain: "<strong>岡山県</strong>！後楽園は江戸時代から続く美しい庭園。日本三名園のひとつ🌸"
+  },
+  
+  // ===== 広島 (1問追加) =====
+  {
+    type: "specialty",
+    icon: "🥞",
+    pref: "hiroshima",
+    question: "麺やキャベツがいっぱい入った「お好み焼き」がゆうめいな県は？",
+    options: ["岡山県", "山口県", "島根県", "広島県"],
+    answer: 3,
+    explain: "<strong>広島県</strong>！広島風お好み焼きは大阪風と違って、麺が入っているのが特徴🥞"
+  },
+  
+  // ===== 山口 (2問追加) =====
+  {
+    type: "culture",
+    icon: "⚔️",
+    pref: "yamaguchi",
+    question: "幕末の志士（しし）「吉田松陰（よしだしょういん）」「高杉晋作（たかすぎしんさく）」を生んだ県は？",
+    options: ["島根県", "鳥取県", "岡山県", "山口県"],
+    answer: 3,
+    explain: "<strong>山口県</strong>！明治維新（いしん）を起こした長州藩（ちょうしゅうはん）の志士たちのふるさと⚔️"
+  },
+  {
+    type: "nature",
+    icon: "🕳️",
+    pref: "yamaguchi",
+    question: "日本最大級の鍾乳洞（しょうにゅうどう）「秋芳洞（あきよしどう）」がある県は？",
+    options: ["島根県", "鳥取県", "岡山県", "山口県"],
+    answer: 3,
+    explain: "<strong>山口県</strong>！秋芳洞は長さ10kmの鍾乳洞。神秘的な地下世界が広がる🕳️"
+  },
+  
+  // ===== 徳島 (1問追加) =====
+  {
+    type: "specialty",
+    icon: "🍊",
+    pref: "tokushima",
+    question: "ゆずに似たかんきつ類「すだち」の生産が日本一の県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 0,
+    explain: "<strong>徳島県</strong>！すだちは徳島の特産品で、お料理のかおりづけに使われる🍋"
+  },
+  
+  // ===== 香川 (1問追加) =====
+  {
+    type: "specialty",
+    icon: "🫒",
+    pref: "kagawa",
+    question: "「小豆島（しょうどしま）」のオリーブ栽培が日本一の県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 1,
+    explain: "<strong>香川県</strong>！小豆島は1908年に日本で最初にオリーブ栽培に成功した島🫒"
+  },
+  
+  // ===== 愛媛 (1問追加) =====
+  {
+    type: "specialty",
+    icon: "🧴",
+    pref: "ehime",
+    question: "今治（いまばり）タオルの生産が日本一の県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 2,
+    explain: "<strong>愛媛県</strong>！今治タオルは品質の高さで世界的に有名なタオルブランド🧴"
+  },
+  
+  // ===== 高知 (1問追加) =====
+  {
+    type: "specialty",
+    icon: "🐟",
+    pref: "kochi",
+    question: "「皿鉢料理（さわちりょうり）」とかつお漁がゆうめいな四国の県は？",
+    options: ["徳島県", "香川県", "愛媛県", "高知県"],
+    answer: 3,
+    explain: "<strong>高知県</strong>！皿鉢料理は大きなお皿に料理を盛りつけた郷土料理🍽️"
+  },
+  
+  // ===== 福岡 (3問追加) =====
+  {
+    type: "specialty",
+    icon: "🍜",
+    pref: "fukuoka",
+    question: "「とんこつラーメン」「博多ラーメン」がゆうめいな九州の県は？",
+    options: ["福岡県", "佐賀県", "長崎県", "熊本県"],
+    answer: 0,
+    explain: "<strong>福岡県</strong>！博多ラーメンは細い麺と白いとんこつスープが特徴🍜"
+  },
+  {
+    type: "specialty",
+    icon: "🐟",
+    pref: "fukuoka",
+    question: "「明太子（めんたいこ）」「もつ鍋」がゆうめいな県は？",
+    options: ["福岡県", "佐賀県", "長崎県", "熊本県"],
+    answer: 0,
+    explain: "<strong>福岡県</strong>！明太子はたらこを唐辛子（とうがらし）でつけた福岡の名物🐟"
+  },
+  {
+    type: "culture",
+    icon: "🎏",
+    pref: "fukuoka",
+    question: "「博多（はかた）どんたく」「山笠（やまかさ）」のまつりがゆうめいな県は？",
+    options: ["福岡県", "佐賀県", "長崎県", "熊本県"],
+    answer: 0,
+    explain: "<strong>福岡県</strong>！博多祇園山笠（はかたぎおんやまかさ）は700年以上の歴史をもつ夏まつり🎌"
+  },
+  
+  // ===== 佐賀 (2問追加) =====
+  {
+    type: "culture",
+    icon: "🎈",
+    pref: "saga",
+    question: "毎年秋に「バルーンフェスタ」（熱気球のお祭り）がひらかれる県は？",
+    options: ["福岡県", "佐賀県", "長崎県", "大分県"],
+    answer: 1,
+    explain: "<strong>佐賀県</strong>！佐賀インターナショナルバルーンフェスタはアジア最大級の熱気球大会🎈"
+  },
+  {
+    type: "culture",
+    icon: "🏛️",
+    pref: "saga",
+    question: "弥生時代（やよいじだい）の遺跡（いせき）「吉野ヶ里（よしのがり）」がある県は？",
+    options: ["福岡県", "佐賀県", "長崎県", "大分県"],
+    answer: 1,
+    explain: "<strong>佐賀県</strong>！吉野ヶ里遺跡は2000年以上前のムラのあとが残る貴重な遺跡🏛️"
+  },
+  
+  // ===== 長崎 (2問追加) =====
+  {
+    type: "culture",
+    icon: "🚢",
+    pref: "nagasaki",
+    question: "江戸時代に外国とのまどぐちだった「出島（でじま）」がある県は？",
+    options: ["福岡県", "佐賀県", "長崎県", "熊本県"],
+    answer: 2,
+    explain: "<strong>長崎県</strong>！出島はオランダとの貿易の窓口だった人工島🚢"
+  },
+  {
+    type: "specialty",
+    icon: "🍰",
+    pref: "nagasaki",
+    question: "「ちゃんぽん」「カステラ」がゆうめいな県は？",
+    options: ["福岡県", "佐賀県", "長崎県", "熊本県"],
+    answer: 2,
+    explain: "<strong>長崎県</strong>！カステラはポルトガルから伝わったお菓子。ちゃんぽんは中国の影響🍰"
+  },
+  
+  // ===== 熊本 (1問追加) =====
+  {
+    type: "specialty",
+    icon: "🐴",
+    pref: "kumamoto",
+    question: "「からし蓮根（れんこん）」「い草（畳の原料）」の生産がゆうめいな県は？",
+    options: ["福岡県", "熊本県", "宮崎県", "大分県"],
+    answer: 1,
+    explain: "<strong>熊本県</strong>！い草の生産は日本一で、たたみの原料になる植物🌾"
+  },
+  
+  // ===== 大分 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "🍊",
+    pref: "oita",
+    question: "「かぼす」の生産が日本一の県は？",
+    options: ["福岡県", "宮崎県", "大分県", "熊本県"],
+    answer: 2,
+    explain: "<strong>大分県</strong>！かぼすはゆずに似たかんきつ類で、料理のかおりづけに使う🍋"
+  },
+  {
+    type: "nature",
+    icon: "♨️",
+    pref: "oita",
+    question: "「地獄めぐり」がゆうめいな日本一の温泉県は？",
+    options: ["福岡県", "宮崎県", "大分県", "熊本県"],
+    answer: 2,
+    explain: "<strong>大分県</strong>！別府の地獄めぐりは色とりどりの温泉が見られる名所♨️"
+  },
+  
+  // ===== 宮崎 (2問追加) =====
+  {
+    type: "specialty",
+    icon: "🐔",
+    pref: "miyazaki",
+    question: "「チキン南蛮（なんばん）」「地鶏（じどり）の炭火焼き」がゆうめいな県は？",
+    options: ["熊本県", "宮崎県", "鹿児島県", "大分県"],
+    answer: 1,
+    explain: "<strong>宮崎県</strong>！チキン南蛮は揚げた鶏肉に甘酢とタルタルソースをかけた料理🍗"
+  },
+  {
+    type: "culture",
+    icon: "⛩️",
+    pref: "miyazaki",
+    question: "天孫降臨（てんそんこうりん）の伝説がある「高千穂（たかちほ）」がある県は？",
+    options: ["熊本県", "宮崎県", "鹿児島県", "大分県"],
+    answer: 1,
+    explain: "<strong>宮崎県</strong>！高千穂は神話のふるさと。神秘的な高千穂峡もゆうめい⛩️"
+  }
 ];
 
 let currentQ = 0;
@@ -2075,6 +2950,53 @@ let answered = false;
 let activeQuestions = []; // シャッフル後の出題リスト
 let questionCount = 20;   // デフォルト問題数
 let selectedGenre = 'all'; // 選択中のジャンル
+
+// === セッション内 重み付け管理 ===
+// セッション中の各問題の正解回数を記録（key: questions配列のindex, value: 正解回数）
+// 重み: 未/不正解=3, 1正解=2, 2正解=1, 3回以上=0.3
+// セッション = このタブを開いている間（ブラウザを閉じる/リロードするとリセット）
+//   ※タイトル画面に「もう一度」で戻っても継続する。LocalStorage保存はしない。
+let sessionCorrectCounts = new Map();
+function getQuestionWeight(qIndex) {
+  const c = sessionCorrectCounts.get(qIndex) || 0;
+  if (c === 0) return 3;
+  if (c === 1) return 2;
+  if (c === 2) return 1;
+  return 0.3;
+}
+function recordCorrect(qIndex) {
+  sessionCorrectCounts.set(qIndex, (sessionCorrectCounts.get(qIndex) || 0) + 1);
+}
+function resetSession() {
+  sessionCorrectCounts.clear();
+}
+// 重み付きランダムで n 件を非復元抽選
+function weightedSample(pool, n) {
+  // pool: [{q, idx}], idx は questions 配列内の index
+  const items = pool.map(p => ({ ...p, w: getQuestionWeight(p.idx) }));
+  const result = [];
+  const remaining = items.slice();
+  const take = Math.min(n, remaining.length);
+  for (let i = 0; i < take; i++) {
+    let total = remaining.reduce((s, it) => s + it.w, 0);
+    let pickIdx = 0;
+    if (total <= 0) {
+      // numerical誤差等で0になった場合は均等抽選にfallback
+      pickIdx = Math.floor(Math.random() * remaining.length);
+    } else {
+      let r = Math.random() * total;
+      for (let j = 0; j < remaining.length; j++) {
+        r -= remaining[j].w;
+        if (r <= 0) { pickIdx = j; break; }
+      }
+    }
+    // 元のq に __idx を付与した浅いコピーを返す（selectAnswer で記録に使用）
+    const picked = remaining[pickIdx];
+    result.push({ ...picked.q, __idx: picked.idx });
+    remaining.splice(pickIdx, 1);
+  }
+  return result;
+}
 
 // 配列をシャッフル（Fisher-Yates）
 function shuffle(arr) {
@@ -2179,14 +3101,14 @@ document.querySelectorAll('.genre-btn').forEach(btn => {
 // ジャンル選択に応じて問題数の上限を調整
 function updateQuestionCountOptions() {
   const genreCounts = {
-    all: 118,
+    all: 188,
     map: 47,
     capital: 18,
-    specialty: 19,
-    nature: 15,
-    culture: 19
+    specialty: 54,
+    nature: 21,
+    culture: 48
   };
-  const max = genreCounts[selectedGenre] || 118;
+  const max = genreCounts[selectedGenre] || 188;
   
   document.querySelectorAll('.mode-btn').forEach(btn => {
     const count = parseInt(btn.dataset.count);
@@ -2237,14 +3159,16 @@ function startQuiz() {
   document.getElementById('titleScreen').style.display = 'none';
   document.getElementById('quizScreen').style.display = 'block';
   
-  // ジャンルでフィルタ → シャッフル → 問題数だけ抽出
+  // ジャンルでフィルタ → 重み付きで問題数だけ抽選
+  // 各問題に元indexを付与してから重み付け抽選
+  const indexed = questions.map((q, idx) => ({ q, idx }));
   let pool;
   if (selectedGenre === 'all') {
-    pool = questions;
+    pool = indexed;
   } else {
-    pool = questions.filter(q => q.type === selectedGenre);
+    pool = indexed.filter(it => it.q.type === selectedGenre);
   }
-  activeQuestions = shuffle(pool).slice(0, questionCount);
+  activeQuestions = weightedSample(pool, questionCount);
   
   currentQ = 0;
   score = 0;
@@ -2287,8 +3211,15 @@ function showQuestion() {
     mapContainer.style.display = 'none';
     iconContainer.style.display = 'none';
     imageContainer.style.display = '';
-    document.getElementById('questionPhoto').src = q.image;
-    document.getElementById('questionPhoto').alt = q.question;
+    const photo = document.getElementById('questionPhoto');
+    photo.src = q.image;
+    photo.alt = q.question;
+    // imageStyle: "cover"（実写・全面表示）／"contain"（イラスト・余白あり）／省略時は contain
+    if (q.imageStyle === 'cover') {
+      photo.setAttribute('data-fit', 'cover');
+    } else {
+      photo.removeAttribute('data-fit');
+    }
   } else {
     // 画像なしの場合はアイコン表示
     mapContainer.style.display = 'none';
@@ -2339,6 +3270,8 @@ function selectAnswer(idx, btn) {
     title.textContent = 'せいかい！';
     title.className = 'feedback-title correct-text';
     createSparkles(btn);
+    // セッション内の正解回数をインクリメント
+    if (typeof q.__idx === 'number') recordCorrect(q.__idx);
   } else {
     btn.classList.add('wrong');
     allBtns[q.answer].classList.add('correct');
